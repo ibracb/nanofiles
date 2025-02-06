@@ -152,7 +152,7 @@ public class DirectoryConnector {
 		byte[] responseExpected = "pingok".getBytes();
 		byte[] response = sendAndReceiveDatagrams(requestData);
 		
-		if(response.equals(responseExpected)) {
+		if(Arrays.equals(response, responseExpected)) {
 			success = true;
 		}
 		
