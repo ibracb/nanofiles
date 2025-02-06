@@ -112,18 +112,24 @@ public class DirectoryConnector {
 		 * NOTA: Las excepciones deben tratarse de la más concreta a la más genérica.
 		 * SocketTimeoutException es más concreta que IOException.
 		 */
-		try {
-			DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
-			socket.send(packetToServer);
-			DatagramPacket packetFromServer = new DatagramPacket(responseData, responseData.length);
-			socket.receive(packetFromServer);
-			response = Arrays.copyOf(packetFromServer.getData(), packetFromServer.getLength());
-		}
-		catch(SocketTimeoutException e) {
-			e.printStackTrace();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
+		boolean success = false;
+		int attempts = 0;
+		while(!success && attempts < MAX_NUMBER_OF_ATTEMPTS) {
+			try {
+				DatagramPacket packetToServer = new DatagramPacket(requestData, requestData.length, directoryAddress);
+				socket.send(packetToServer);
+				DatagramPacket packetFromServer = new DatagramPacket(responseData, responseData.length);
+				socket.setSoTimeout(TIMEOUT);
+				socket.receive(packetFromServer);
+				response = Arrays.copyOf(packetFromServer.getData(), packetFromServer.getLength());
+				success = true;
+			}
+			catch(SocketTimeoutException e) {
+				attempts++;
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if (response != null && response.length == responseData.length) {

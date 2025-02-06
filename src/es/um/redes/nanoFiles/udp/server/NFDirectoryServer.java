@@ -79,24 +79,15 @@ public class NFDirectoryServer {
 			/*
 			 * TODO: (Boletín SocketsUDP) Recibimos a través del socket un datagrama
 			 */
+			byte[] bufferReception = new byte[DirMessage.PACKET_MAX_SIZE];
+			datagramReceivedFromClient = new DatagramPacket(bufferReception, bufferReception.length);
+			socket.receive(datagramReceivedFromClient);
 			
-			try {
-				byte[] bufferReception = new byte[DirMessage.PACKET_MAX_SIZE];
-				datagramReceivedFromClient = new DatagramPacket(bufferReception, bufferReception.length);
-				socket.receive(datagramReceivedFromClient);
-			}
-			catch(SocketTimeoutException e) {
-				e.printStackTrace();
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-			
-			/*if (datagramReceivedFromClient == null) {
+			if (datagramReceivedFromClient == null) {
 				System.err.println("[testMode] NFDirectoryServer.receiveDatagram: code not yet fully functional.\n"
 						+ "Check that all TODOs have been correctly addressed!");
 				System.exit(-1);
-			} else {*/
+			} else {
 				// Vemos si el mensaje debe ser ignorado (simulación de un canal no confiable)
 				double rand = Math.random();
 				if (rand < messageDiscardProbability) {
@@ -108,7 +99,7 @@ public class NFDirectoryServer {
 							.println("Directory received datagram from " + datagramReceivedFromClient.getSocketAddress()
 									+ " of size " + datagramReceivedFromClient.getLength() + " bytes.");
 				}
-			//}
+			}
 
 		}
 
@@ -156,28 +147,19 @@ public class NFDirectoryServer {
 		System.out.println("Data received: " + messageFromClient);
 		
 		
-		try {
-			byte[] requestData;
-			DatagramPacket packetToClient;
-			
-			if(messageFromClient.equals("ping")) {
-				requestData = "pingok".getBytes();
-			}
-			else {
-				System.err.println("Message received is not a ping");
-				requestData = "invalid".getBytes();
-			}
-			InetSocketAddress clientAddress = (InetSocketAddress) pkt.getSocketAddress(); 
-			packetToClient = new DatagramPacket(requestData, requestData.length, clientAddress);
-			socket.send(packetToClient);
-		}
-		catch(SocketTimeoutException e) {
-			e.printStackTrace();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+		byte[] requestData;
+		DatagramPacket packetToClient;
 		
+		if(messageFromClient.equals("ping")) {
+			requestData = "pingok".getBytes();
+		}
+		else {
+			System.err.println("Message received is not a ping");
+			requestData = "invalid".getBytes();
+		}
+		InetSocketAddress clientAddress = (InetSocketAddress) pkt.getSocketAddress(); 
+		packetToClient = new DatagramPacket(requestData, requestData.length, clientAddress);
+		socket.send(packetToClient);
 	}
 
 	public void run() throws IOException {
