@@ -208,6 +208,7 @@ public class DirectoryConnector {
 		byte[] responseExpected = "welcome".getBytes();
 		byte[] response = sendAndReceiveDatagrams(requestData);
 		
+		
 		if(response!=null && Arrays.equals(response, responseExpected)) {
 			System.out.println("Ping successful: connection established to the directory!");
 			success = true;

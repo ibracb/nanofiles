@@ -154,14 +154,18 @@ public class NFDirectoryServer {
 		if(messageFromClient.equals("ping")) {
 			requestData = "pingok".getBytes();
 		}
-		else if(messageFromClient.equals("ping&"+NanoFiles.PROTOCOL_ID)) {
-			DirectoryConnector directoryConnector = new DirectoryConnector("localhost");
-			if(directoryConnector.pingDirectoryRaw()) {
-				requestData = "welcome".getBytes();
-			}
-			else {
-				requestData = "denied".getBytes();
-			}
+		else if(messageFromClient.startsWith("ping&")) {
+			
+			// Si el mensaje comienza con "ping&", comprobamos el protocol_id
+	        String protocolId = messageFromClient.substring(5);  // Extraemos el protocolo tras "ping&"
+	        
+	        if (protocolId.equals(NanoFiles.PROTOCOL_ID)) {
+	            // Si el protocolo coincide, respondemos con "welcome"
+	            requestData = "welcome".getBytes();
+	        } else {
+	            // Si el protocolo no coincide, respondemos con "denied"
+	            requestData = "denied".getBytes();
+	        }
 		}
 		else {
 			System.err.println("Message received is not a ping");
