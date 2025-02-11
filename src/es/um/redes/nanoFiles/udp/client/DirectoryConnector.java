@@ -200,7 +200,7 @@ public class DirectoryConnector {
 			success = true;
 		}
 		else {
-			System.err.println("ERROR: Unexpected response from directory ->" + Arrays.toString(response));
+			System.err.println("ERROR: Unexpected response from directory -> " + Arrays.toString(response));
 		}
 		
 		return success;

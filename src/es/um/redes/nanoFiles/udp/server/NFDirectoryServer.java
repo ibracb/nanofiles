@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
+import es.um.redes.nanoFiles.udp.client.DirectoryConnector;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
 import es.um.redes.nanoFiles.util.FileInfo;
@@ -154,7 +155,13 @@ public class NFDirectoryServer {
 			requestData = "pingok".getBytes();
 		}
 		else if(messageFromClient.equals("ping&"+NanoFiles.PROTOCOL_ID)) {
-			byte
+			DirectoryConnector directoryConnector = new DirectoryConnector("localhost");
+			if(directoryConnector.pingDirectoryRaw()) {
+				requestData = "welcome".getBytes();
+			}
+			else {
+				requestData = "denied".getBytes();
+			}
 		}
 		else {
 			System.err.println("Message received is not a ping");
