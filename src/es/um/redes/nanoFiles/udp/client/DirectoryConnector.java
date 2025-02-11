@@ -189,9 +189,20 @@ public class DirectoryConnector {
 		 * recibida en el datagrama de respuesta es "welcome", imprimir si éxito o
 		 * fracaso. 6.Devolver éxito/fracaso de la operación.
 		 */
-
-
-
+		String message = "ping&"+NanoFiles.PROTOCOL_ID;
+		
+		byte[] requestData = message.getBytes();
+		byte[] responseExpected = "welcome".getBytes();
+		byte[] response = sendAndReceiveDatagrams(requestData);
+		
+		if(Arrays.equals(response, responseExpected)) {
+			System.out.println("Ping successful: connection established to the directory!");
+			success = true;
+		}
+		else {
+			System.err.println("ERROR: Unexpected response from directory ->" + Arrays.toString(response));
+		}
+		
 		return success;
 	}
 
