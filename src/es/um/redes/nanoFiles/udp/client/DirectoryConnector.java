@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
@@ -126,11 +127,22 @@ public class DirectoryConnector {
 			}
 			catch(SocketTimeoutException e) {
 				attempts++;
+	            System.err.println("Timeout! Intento " + attempts + " de " + MAX_NUMBER_OF_ATTEMPTS);
+			}
+			catch (SocketException e) {  // Capturando excepciones más específicas como SocketException
+			    System.err.println("Error en el socket: " + e.getMessage());
+			    e.printStackTrace();
+			    attempts = MAX_NUMBER_OF_ATTEMPTS; // Termina el ciclo de intentos
 			}
 			catch(IOException e) {
+	            System.err.println("Error crítico de E/S al enviar/recibir datagramas.");
 				e.printStackTrace();
+				attempts= MAX_NUMBER_OF_ATTEMPTS;
 			}
 		}
+		if (!success) {
+	        System.err.println("Error: No response received after " + MAX_NUMBER_OF_ATTEMPTS + " attempts.");
+	    }
 
 		if (response != null && response.length == responseData.length) {
 			System.err.println("Your response is as large as the datagram reception buffer!!\n"
@@ -158,7 +170,7 @@ public class DirectoryConnector {
 		byte[] responseExpected = "pingok".getBytes();
 		byte[] response = sendAndReceiveDatagrams(requestData);
 		
-		if(Arrays.equals(response, responseExpected)) {
+		if(response!=null && Arrays.equals(response, responseExpected)) {
 			success = true;
 		}
 		
@@ -191,11 +203,12 @@ public class DirectoryConnector {
 		 */
 		String message = "ping&"+NanoFiles.PROTOCOL_ID;
 		
+		
 		byte[] requestData = message.getBytes();
 		byte[] responseExpected = "welcome".getBytes();
 		byte[] response = sendAndReceiveDatagrams(requestData);
 		
-		if(Arrays.equals(response, responseExpected)) {
+		if(response!=null && Arrays.equals(response, responseExpected)) {
 			System.out.println("Ping successful: connection established to the directory!");
 			success = true;
 		}
