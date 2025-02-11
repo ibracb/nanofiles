@@ -153,6 +153,9 @@ public class NFDirectoryServer {
 		if(messageFromClient.equals("ping")) {
 			requestData = "pingok".getBytes();
 		}
+		else if(messageFromClient.equals("ping&"+NanoFiles.PROTOCOL_ID)) {
+			byte
+		}
 		else {
 			System.err.println("Message received is not a ping");
 			requestData = "invalid".getBytes();
