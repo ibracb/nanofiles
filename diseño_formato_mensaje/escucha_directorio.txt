@@ -1,0 +1,49 @@
+********************************************************************************
+/*
+* A simple ping.
+*/
+
+//NanoFiles
+operation:ping\n
+\n
+
+//Directory
+operation:pingok\n
+\n
+********************************************************************************
+/*
+* Ping, with the correct PROTOCOL_ID.
+*/
+
+//NanoFiles
+operation:ping\n
+protocol:BALATRO1.1\n
+\n
+
+//Directory
+operation:welcome\n
+\n
+********************************************************************************
+/*
+* Ping, with the incorrect PROTOCOL_ID.
+*/
+
+//NanoFiles
+operation:ping\n
+protocol:PASSWORD_123\n
+
+//Directory
+operation:denied\n
+\n
+********************************************************************************
+/*
+* Not a ping.
+*/
+
+//NanoFiles
+operation:login\n
+\n
+
+//Directory
+operation:invalid\n
+\n

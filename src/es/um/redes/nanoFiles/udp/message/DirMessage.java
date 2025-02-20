@@ -1,7 +1,7 @@
 package es.um.redes.nanoFiles.udp.message;
 
-
-
+import java.net.InetSocketAddress;
+import java.util.Set;
 
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
@@ -27,9 +27,11 @@ public class DirMessage {
 	 * todos los campos que pueden aparecer en los mensajes de este protocolo
 	 * (formato campo:valor)
 	 */
-
-
-
+	private static final String FIELDNAME_NAME = "name";
+	private static final String FIELDNAME_SIZE = "size";
+	private static final String FIELDNAME_HASH = "hash";
+	private static final String FILEDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
+	
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -42,10 +44,11 @@ public class DirMessage {
 	 * TODO: (Boletín MensajesASCII) Crear un atributo correspondiente a cada uno de
 	 * los campos de los diferentes mensajes de este protocolo.
 	 */
-
-
-
-
+	private String name;
+	private int size;
+	private String hash;
+	private Set<InetSocketAddress> serverSocketAddresses;
+	
 	public DirMessage(String op) {
 		operation = op;
 	}
@@ -84,8 +87,41 @@ public class DirMessage {
 		return protocolId;
 	}
 
+	public String getName() {
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
 
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public Set<InetSocketAddress> getServerSocketAddresses() {
+		return serverSocketAddresses;
+	}
+
+	public void setServerSocketAddresses(Set<InetSocketAddress> serverSocketAddresses) {
+		this.serverSocketAddresses = serverSocketAddresses;
+	}
+
+	public void setOperation(String operation) {
+		this.operation = operation;
+	}
 
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a

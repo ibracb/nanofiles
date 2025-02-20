@@ -69,6 +69,7 @@ public class NFDirectoryServer {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public DatagramPacket receiveDatagram() throws IOException {
 		DatagramPacket datagramReceivedFromClient = null;
 		boolean datagramReceived = false;
@@ -156,11 +157,11 @@ public class NFDirectoryServer {
 		}
 		else if(messageFromClient.startsWith("ping&")) {
 			
-			// Si el mensaje comienza con "ping&", comprobamos el protocol_id
-	        String protocolId = messageFromClient.substring(5);  // Extraemos el protocolo tras "ping&"
+			// Si el mensaje comienza con "ping&", comprobamos el protocolId
+	        String protocolId = messageFromClient.substring(5);  // Extraemos el protocolId tras "ping&"
 	        
 	        if (protocolId.equals(NanoFiles.PROTOCOL_ID)) {
-	            // Si el protocolo coincide, respondemos con "welcome"
+	            // Si el protocolId coincide, respondemos con "welcome"
 	            requestData = "welcome".getBytes();
 	        } else {
 	            // Si el protocolo no coincide, respondemos con "denied"
