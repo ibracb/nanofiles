@@ -12,6 +12,7 @@ import java.util.Arrays;
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
+import es.um.redes.nanoFiles.udp.server.NFDirectoryServer;
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -239,9 +240,20 @@ public class DirectoryConnector {
 		 * 6.Extraer datos del objeto DirMessage y procesarlos 7.Devolver éxito/fracaso
 		 * de la operación
 		 */
-
-
-
+		DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING);
+		String messageString = message.toString();
+		byte[] buffer = new byte[DirMessage.PACKET_MAX_SIZE];
+		 
+		DatagramPacket datagram = new DatagramPacket(buffer, buffer.length,directoryAddress);
+		byte[] bytes=datagram.getData();
+		byte[] response=sendAndReceiveDatagrams(bytes);
+		String res=new String(response);
+		DirMessage dir=DirMessage.fromString(res);
+		String r=dir.toString();
+		if(r.equals()) {
+			success=true;
+		}
+		
 		return success;
 	}
 

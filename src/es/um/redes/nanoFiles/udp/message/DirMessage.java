@@ -3,6 +3,8 @@ package es.um.redes.nanoFiles.udp.message;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
+import es.um.redes.nanoFiles.application.NanoFiles;
+
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
  * implementar el explorador de ficheros remoto (servidor de ficheros). Estos
@@ -27,6 +29,7 @@ public class DirMessage {
 	 * todos los campos que pueden aparecer en los mensajes de este protocolo
 	 * (formato campo:valor)
 	 */
+	private static final String FIELDNAME_PROTOCOL = "protocol";
 	private static final String FIELDNAME_NAME = "name";
 	private static final String FIELDNAME_SIZE = "size";
 	private static final String FIELDNAME_HASH = "hash";
@@ -58,8 +61,10 @@ public class DirMessage {
 	 * construir mensajes de diferentes tipos con sus correspondientes argumentos
 	 * (campos del mensaje)
 	 */
-
-
+	public DirMessage(String op,String pro) {
+		operation = op;
+		protocolId = pro;
+	}
 
 
 	public String getOperation() {
@@ -81,8 +86,6 @@ public class DirMessage {
 	}
 
 	public String getProtocolId() {
-
-
 
 		return protocolId;
 	}
@@ -148,6 +151,7 @@ public class DirMessage {
 
 
 		for (String line : lines) {
+			String aux=DirMessageOps.OPERATION_INVALID;
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
 			String fieldName = line.substring(0, idx).toLowerCase(); // minúsculas
 			String value = line.substring(idx + 1).trim();
@@ -156,6 +160,11 @@ public class DirMessage {
 			case FIELDNAME_OPERATION: {
 				assert (m == null);
 				m = new DirMessage(value);
+				break;
+			}
+			case FIELDNAME_PROTOCOL: {
+				assert (m==null);
+				m= new DirMessage(aux,value);
 				break;
 			}
 
@@ -167,6 +176,7 @@ public class DirMessage {
 				System.err.println("Message was:\n" + message);
 				System.exit(-1);
 			}
+			aux=value;
 		}
 
 
@@ -185,7 +195,13 @@ public class DirMessage {
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(FIELDNAME_OPERATION + DELIMITER + operation + END_LINE); // Construimos el campo
+		if(protocolId.equals(DirMessageOps.OPERATION_INVALID)) {
+			sb.append(FIELDNAME_OPERATION + DELIMITER + operation + END_LINE); // Construimos el campo
+		}
+		else {
+			sb.append(FIELDNAME_OPERATION + DELIMITER + operation + FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE); // Construimos el campo
+		}
+		
 		/*
 		 * TODO: (Boletín MensajesASCII) En función de la operación del mensaje, crear
 		 * una cadena la operación y concatenar el resto de campos necesarios usando los
