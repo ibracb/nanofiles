@@ -242,7 +242,7 @@ public class DirectoryConnector {
 		 */
 		DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING);
 		String messageString = message.toString();
-		byte[] buffer = new byte[DirMessage.PACKET_MAX_SIZE];
+		byte[] buffer = messageString.getBytes();
 		 
 		DatagramPacket datagram = new DatagramPacket(buffer, buffer.length,directoryAddress);
 		byte[] bytes=datagram.getData();
@@ -250,7 +250,7 @@ public class DirectoryConnector {
 		String res=new String(response);
 		DirMessage dir=DirMessage.fromString(res);
 		String r=dir.toString();
-		if(r.equals()) {
+		if(r.equals(res)) {
 			success=true;
 		}
 		
@@ -321,10 +321,6 @@ public class DirectoryConnector {
 	 */
 	public boolean unregisterFileServer() {
 		boolean success = false;
-
-
-
-
 		return success;
 	}
 

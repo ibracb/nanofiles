@@ -1,9 +1,13 @@
 package es.um.redes.nanoFiles.udp.message;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
+import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
@@ -34,7 +38,7 @@ public class DirMessage {
 	private static final String FIELDNAME_SIZE = "size";
 	private static final String FIELDNAME_HASH = "hash";
 	private static final String FILEDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
-	
+	private static final String FIELDNAME_FILE = "file";
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -51,7 +55,7 @@ public class DirMessage {
 	private int size;
 	private String hash;
 	private Set<InetSocketAddress> serverSocketAddresses;
-	
+	private List<FileInfo> files;
 	public DirMessage(String op) {
 		operation = op;
 	}
@@ -64,6 +68,10 @@ public class DirMessage {
 	public DirMessage(String op,String pro) {
 		operation = op;
 		protocolId = pro;
+	}
+	public DirMessage(String op, FileInfo[] files) {
+		operation = op;
+		this.files = new LinkedList<FileInfo>(Arrays.asList(files));
 	}
 
 
@@ -148,8 +156,6 @@ public class DirMessage {
 		// Local variables to save data during parsing
 		DirMessage m = null;
 
-
-
 		for (String line : lines) {
 			String aux=DirMessageOps.OPERATION_INVALID;
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
@@ -168,9 +174,6 @@ public class DirMessage {
 				break;
 			}
 
-
-
-
 			default:
 				System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
 				System.err.println("Message was:\n" + message);
@@ -178,10 +181,6 @@ public class DirMessage {
 			}
 			aux=value;
 		}
-
-
-
-
 		return m;
 	}
 

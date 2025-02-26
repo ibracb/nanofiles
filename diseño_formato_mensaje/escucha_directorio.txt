@@ -47,3 +47,30 @@ operation:login\n
 //Directory
 operation:invalid\n
 \n
+********************************************************************************
+//Nanofiles
+operation:filelist\n
+\n
+//Directory
+operation:filelistok\n
+files:2044.jpg,balatro.png\n
+\n
+********************************************************************************
+/*
+* Server launched successfully
+*/
+//Nanofiles
+operation:serve\n
+\n
+//Directory
+operation:serveok\n
+message:"server listening at port 10000\tcp"\n
+\n
+
+********************************************************************************
+//Nanofiles
+operation:listOfPeer
+name:nombrefichero.pdf
+
+
+

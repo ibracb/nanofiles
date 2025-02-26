@@ -199,7 +199,10 @@ public class NFDirectoryServer {
 		 * métodos "getter" para procesar el mensaje y consultar/modificar el estado del
 		 * servidor.
 		 */
-
+		byte [] pktdata = pkt.getData();
+		String pktstr = new String(pktdata);
+		System.out.println(pktstr);
+		DirMessage dirpkt = DirMessage.fromString(pktstr);
 
 
 		/*
@@ -207,7 +210,7 @@ public class NFDirectoryServer {
 		 * recibido, obtener el tipo de operación solicitada por el mensaje y actuar en
 		 * consecuencia, enviando uno u otro tipo de mensaje en respuesta.
 		 */
-		String operation = DirMessageOps.OPERATION_INVALID; // TODO: Cambiar!
+		String operation = dirpkt.getOperation(); // TODO: Cambiar!
 
 		/*
 		 * TODO: (Boletín MensajesASCII) Construir un objeto DirMessage (msgToSend) con
@@ -217,6 +220,7 @@ public class NFDirectoryServer {
 		 * contendrán los valores adecuados para los diferentes campos del mensaje a
 		 * enviar como respuesta (operation, etc.)
 		 */
+		DirMessage msgToSend;
 
 
 
