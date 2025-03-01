@@ -1,14 +1,5 @@
 package es.um.redes.nanoFiles.udp.message;
 
-import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import es.um.redes.nanoFiles.application.NanoFiles;
-import es.um.redes.nanoFiles.util.FileInfo;
-
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
  * implementar el explorador de ficheros remoto (servidor de ficheros). Estos
@@ -34,11 +25,10 @@ public class DirMessage {
 	 * (formato campo:valor)
 	 */
 	private static final String FIELDNAME_PROTOCOL = "protocol";
-	private static final String FIELDNAME_NAME = "name";
-	private static final String FIELDNAME_SIZE = "size";
-	private static final String FIELDNAME_HASH = "hash";
-	private static final String FILEDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
-	private static final String FIELDNAME_FILE = "file";
+	private static final String FIELDNAME_FILENAME = "filename";
+	private static final String FIELDNAME_FILESIZE = "filesize";
+	private static final String FIELDNAME_FILEHASH = "filehash";
+	private static final String FIELDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -51,30 +41,25 @@ public class DirMessage {
 	 * TODO: (Boletín MensajesASCII) Crear un atributo correspondiente a cada uno de
 	 * los campos de los diferentes mensajes de este protocolo.
 	 */
-	private String name;
-	private int size;
-	private String hash;
-	private Set<InetSocketAddress> serverSocketAddresses;
-	private List<FileInfo> files;
-	public DirMessage(String op) {
-		operation = op;
-	}
-
+	private String fileName;
+	private String fileSize;
+	private String fileHash;
+	private String serverSocketAddresses;
+	
 	/*
 	 * TODO: (Boletín MensajesASCII) Crear diferentes constructores adecuados para
 	 * construir mensajes de diferentes tipos con sus correspondientes argumentos
 	 * (campos del mensaje)
 	 */
-	public DirMessage(String op,String pro) {
-		operation = op;
-		protocolId = pro;
+	public DirMessage(String operation) {
+		this.operation = operation;
 	}
-	public DirMessage(String op, FileInfo[] files) {
-		operation = op;
-		this.files = new LinkedList<FileInfo>(Arrays.asList(files));
+	
+	public DirMessage(String operation, String protocolId) {
+		this.operation = operation;
+		this.protocolId = protocolId;
 	}
-
-
+	
 	public String getOperation() {
 		return operation;
 	}
@@ -97,41 +82,53 @@ public class DirMessage {
 
 		return protocolId;
 	}
-
-	public String getName() {
-		return name;
+	
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFileName(String fileName) {
+		/*if(!operation.equals(DirMessageOps)) {
+			throw new RuntimeException(
+					"DirMessage: setFileName called for message of unexpected type (" + operation + ")");
+		}*/
+		this.fileName = fileName;
 	}
 
-	public int getSize() {
-		return size;
+	public String getFileSize() {
+		return fileSize;
 	}
 
-	public void setSize(int size) {
-		this.size = size;
+	public void setFileSize(String fileSize) {
+		/*if(!operation.equals(DirMessageOps)) {
+			throw new RuntimeException(
+					"DirMessage: setSize called for message of unexpected type (" + operation + ")");
+		}*/
+		this.fileSize = fileSize;
 	}
 
-	public String getHash() {
-		return hash;
+	public String getFileHash() {
+		return fileHash;
 	}
 
-	public void setHash(String hash) {
-		this.hash = hash;
+	public void setFileHash(String fileHash) {
+		/*if(!operation.equals(DirMessageOps)) {
+			throw new RuntimeException(
+					"DirMessage: setHash called for message of unexpected type (" + operation + ")");
+		}*/
+		this.fileHash = fileHash;
 	}
 
-	public Set<InetSocketAddress> getServerSocketAddresses() {
+	public String getServerSocketAddresses() {
 		return serverSocketAddresses;
 	}
 
-	public void setServerSocketAddresses(Set<InetSocketAddress> serverSocketAddresses) {
+	public void setServerSocketAddresses(String serverSocketAddresses) {
+		/*if(!operation.equals(DirMessageOps)) {
+			throw new RuntimeException(
+					"DirMessage: setServerSocketAddresses called for message of unexpected type (" + operation + ")");
+		}*/
 		this.serverSocketAddresses = serverSocketAddresses;
-	}
-
-	public void setOperation(String operation) {
-		this.operation = operation;
 	}
 
 	/**
@@ -157,29 +154,46 @@ public class DirMessage {
 		DirMessage m = null;
 
 		for (String line : lines) {
-			String aux=DirMessageOps.OPERATION_INVALID;
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
 			String fieldName = line.substring(0, idx).toLowerCase(); // minúsculas
 			String value = line.substring(idx + 1).trim();
 
 			switch (fieldName) {
-			case FIELDNAME_OPERATION: {
-				assert (m == null);
-				m = new DirMessage(value);
-				break;
+				case FIELDNAME_OPERATION: {
+					assert (m == null);
+					m = new DirMessage(value);
+					break;
+				}
+				case FIELDNAME_PROTOCOL: {
+					assert (m!=null);
+					m.setProtocolID(value);
+					break;
+				}
+				case FIELDNAME_FILENAME: {
+					assert (m!=null);
+					m.setFileName(value);
+					break;
+				}
+				case FIELDNAME_FILESIZE: {
+					assert(m!=null);
+					m.setFileSize(value);
+				}
+				case FIELDNAME_FILEHASH: {
+					assert(m!=null);
+					m.setFileHash(value);
+					break;
+				}
+				case FIELDNAME_SERVERSOCKETADDRESSES: {
+					assert(m!=null);
+					m.setServerSocketAddresses(value);
+					break;
+				}
+				
+				default:
+					System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
+					System.err.println("Message was:\n" + message);
+					System.exit(-1);
 			}
-			case FIELDNAME_PROTOCOL: {
-				assert (m==null);
-				m= new DirMessage(aux,value);
-				break;
-			}
-
-			default:
-				System.err.println("PANIC: DirMessage.fromString - message with unknown field name " + fieldName);
-				System.err.println("Message was:\n" + message);
-				System.exit(-1);
-			}
-			aux=value;
 		}
 		return m;
 	}
@@ -194,21 +208,17 @@ public class DirMessage {
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
-		if(protocolId.equals(DirMessageOps.OPERATION_INVALID)) {
-			sb.append(FIELDNAME_OPERATION + DELIMITER + operation + END_LINE); // Construimos el campo
-		}
-		else {
-			sb.append(FIELDNAME_OPERATION + DELIMITER + operation + FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE); // Construimos el campo
-		}
-		
+		sb.append(FIELDNAME_OPERATION + DELIMITER + operation + END_LINE);
 		/*
 		 * TODO: (Boletín MensajesASCII) En función de la operación del mensaje, crear
 		 * una cadena la operación y concatenar el resto de campos necesarios usando los
 		 * valores de los atributos del objeto.
 		 */
-
-
-
+		switch(operation) {
+		case DirMessageOps.OPERATION_PING:
+			sb.append(FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE);
+			break;
+		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();
 	}

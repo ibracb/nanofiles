@@ -12,7 +12,6 @@ import java.util.Arrays;
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
-import es.um.redes.nanoFiles.udp.server.NFDirectoryServer;
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -128,15 +127,15 @@ public class DirectoryConnector {
 			}
 			catch(SocketTimeoutException e) {
 				attempts++;
-	            System.err.println("Timeout! Intento " + attempts + " de " + MAX_NUMBER_OF_ATTEMPTS);
+	            System.err.println("Timeout! Attempt " + attempts + " of " + MAX_NUMBER_OF_ATTEMPTS);
 			}
 			catch (SocketException e) {  // Capturando excepciones más específicas como SocketException
-			    System.err.println("Error en el socket: " + e.getMessage());
+			    System.err.println("Socket error: " + e.getMessage());
 			    e.printStackTrace();
 			    attempts = MAX_NUMBER_OF_ATTEMPTS; // Termina el ciclo de intentos
 			}
 			catch(IOException e) {
-	            System.err.println("Error crítico de E/S al enviar/recibir datagramas.");
+	            System.err.println("Critical I/O error when sending/receiving datagrams.");
 				e.printStackTrace();
 				attempts= MAX_NUMBER_OF_ATTEMPTS;
 			}
@@ -240,18 +239,16 @@ public class DirectoryConnector {
 		 * 6.Extraer datos del objeto DirMessage y procesarlos 7.Devolver éxito/fracaso
 		 * de la operación
 		 */
-		DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING);
-		String messageString = message.toString();
-		byte[] buffer = messageString.getBytes();
-		 
-		DatagramPacket datagram = new DatagramPacket(buffer, buffer.length,directoryAddress);
-		byte[] bytes=datagram.getData();
-		byte[] response=sendAndReceiveDatagrams(bytes);
-		String res=new String(response);
-		DirMessage dir=DirMessage.fromString(res);
-		String r=dir.toString();
-		if(r.equals(res)) {
-			success=true;
+		
+		DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, NanoFiles.PROTOCOL_ID);
+		String messageStr = message.toString();
+		byte[] messageBytes = messageStr.getBytes();
+		byte[] response = sendAndReceiveDatagrams(messageBytes);
+		String responseToString = new String(response, 0, response.length);
+		DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
+		
+		if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_WELCOME)) {
+			success = true;
 		}
 		
 		return success;

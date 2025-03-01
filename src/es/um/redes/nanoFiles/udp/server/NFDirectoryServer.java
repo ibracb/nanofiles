@@ -5,15 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.util.HashMap;
-import java.util.LinkedList;
-
 import es.um.redes.nanoFiles.application.NanoFiles;
-import es.um.redes.nanoFiles.udp.client.DirectoryConnector;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
-import es.um.redes.nanoFiles.util.FileInfo;
 
 public class NFDirectoryServer {
 	/**
@@ -211,7 +205,7 @@ public class NFDirectoryServer {
 		 * consecuencia, enviando uno u otro tipo de mensaje en respuesta.
 		 */
 		String operation = dirpkt.getOperation(); // TODO: Cambiar!
-
+		
 		/*
 		 * TODO: (Boletín MensajesASCII) Construir un objeto DirMessage (msgToSend) con
 		 * la respuesta a enviar al cliente, en función del tipo de mensaje recibido,
@@ -220,7 +214,7 @@ public class NFDirectoryServer {
 		 * contendrán los valores adecuados para los diferentes campos del mensaje a
 		 * enviar como respuesta (operation, etc.)
 		 */
-		DirMessage msgToSend;
+		DirMessage msgToSend = null;
 
 
 
@@ -228,10 +222,14 @@ public class NFDirectoryServer {
 
 		switch (operation) {
 		case DirMessageOps.OPERATION_PING: {
-
-
-
-
+			
+			if(dirpkt.getProtocolId().equals(NanoFiles.PROTOCOL_ID)) {
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_PING_WELCOME);
+			}
+			else {
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_PING_DENIED);
+			}
+			
 			/*
 			 * TODO: (Boletín MensajesASCII) Comprobamos si el protocolId del mensaje del
 			 * cliente coincide con el nuestro.
@@ -246,8 +244,7 @@ public class NFDirectoryServer {
 			 * procesar la petición recibida (éxito o fracaso) con los datos relevantes, a
 			 * modo de depuración en el servidor
 			 */
-
-
+			System.out.println(msgToSend.toString());
 
 			break;
 		}
@@ -264,8 +261,10 @@ public class NFDirectoryServer {
 		 * (msgToSend) con el mensaje de respuesta a enviar, extraer los bytes en que se
 		 * codifica el string y finalmente enviarlos en un datagrama
 		 */
-
-
-
+		String msgToString = msgToSend.toString();
+		byte[] bytesMsg = msgToString.getBytes();
+		InetSocketAddress clientAddress = (InetSocketAddress) pkt.getSocketAddress(); 
+		DatagramPacket packetToClient = new DatagramPacket(bytesMsg, bytesMsg.length, clientAddress);
+		socket.send(packetToClient);
 	}
 }
