@@ -227,7 +227,6 @@ public class DirectoryConnector {
 	 * @return Verdadero si el directorio está operativo y es compatible
 	 */
 	public boolean pingDirectory() {
-		boolean success = false;
 		/*
 		 * TODO: (Boletín MensajesASCII) Hacer ping al directorio 1.Crear el mensaje a
 		 * enviar (objeto DirMessage) con atributos adecuados (operation, etc.) NOTA:
@@ -239,19 +238,24 @@ public class DirectoryConnector {
 		 * 6.Extraer datos del objeto DirMessage y procesarlos 7.Devolver éxito/fracaso
 		 * de la operación
 		 */
-		
-		DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, NanoFiles.PROTOCOL_ID);
-		String messageStr = message.toString();
-		byte[] messageBytes = messageStr.getBytes();
-		byte[] response = sendAndReceiveDatagrams(messageBytes);
-		String responseToString = new String(response, 0, response.length);
-		DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
-		
-		if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_WELCOME)) {
-			success = true;
+		try {
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, NanoFiles.PROTOCOL_ID);
+			String messageStr = message.toString();
+			byte[] messageBytes = messageStr.getBytes();
+			byte[] response = sendAndReceiveDatagrams(messageBytes);
+			if (response == null || response.length == 0) {
+				return false;
+			}
+			String responseToString = new String(response).trim();
+			DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
+			
+			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_WELCOME)) {
+				return true;
+			}
+			return false;
+		}catch(Exception e) {
+			return false;
 		}
-		
-		return success;
 	}
 
 	/**

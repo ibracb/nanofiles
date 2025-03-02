@@ -69,8 +69,9 @@ message:"server listening at port 10000\tcp"\n
 
 ********************************************************************************
 //Nanofiles
-operation:listOfPeer
-name:nombrefichero.pdf
+operation:listOfPeer\n
+name:nombrefichero.pdf\n
+\n
 
 
 
