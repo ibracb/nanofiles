@@ -271,6 +271,14 @@ public class DirectoryConnector {
 		boolean success = false;
 
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
+		try {
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_REGISTER, NanoFiles.PROTOCOL_ID);
+	        message.setPort(serverPort);
+	        message.setFileList(files);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 
 
 

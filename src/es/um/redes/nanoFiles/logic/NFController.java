@@ -12,6 +12,10 @@ public class NFController {
 	 * Diferentes estados del cliente de acuerdo con el autómata
 	 */
 	private static final byte OFFLINE = 0;
+	private static final byte CONNECTED = 1;
+	private static final byte SERVING = 2;
+	private static final byte DOWNLOADING = 3;
+	private static final byte UPLOADING = 4;
 	/*
 	 * TODO: (Boletín Autómatas) Añadir más constantes que representen los estados
 	 * del autómata del cliente de directorio.
@@ -211,9 +215,23 @@ public class NFController {
 			commandAllowed = true;
 			break;
 		}
+		case NFCommands.COM_PING:
+		case NFCommands.COM_FILELIST:
+			commandAllowed = (currentState == OFFLINE || currentState == CONNECTED);
+			break;
+		case NFCommands.COM_SERVE:
+			commandAllowed = (currentState == CONNECTED);
+			break;
+		case NFCommands.COM_DOWNLOAD:
+			commandAllowed =(currentState == CONNECTED) ; 
+			break;
+		case NFCommands.COM_UPLOAD:
+			commandAllowed =(currentState == CONNECTED) ; 
+			break;
+		case NFCommands.COM_QUIT:
+			commandAllowed = true;
 		default:
-			// System.err.println("ERROR: undefined behaviour for " + currentCommand + "
-			// command!");
+			System.err.println("ERROR: undefined behaviour for " + currentCommand + "command!");
 		}
 		return commandAllowed;
 	}
@@ -228,8 +246,25 @@ public class NFController {
 			return;
 		}
 		switch (currentCommand) {
+		case NFCommands.COM_PING:
+		case NFCommands.COM_FILELIST:
+			currentState = CONNECTED;
+			break;
+		case NFCommands.COM_SERVE:
+			currentState = SERVING;
+			break;
+		case NFCommands.COM_DOWNLOAD:
+			currentState = DOWNLOADING;
+			break;
+		case NFCommands.COM_UPLOAD:
+			currentState = UPLOADING;
+			break;
+		case NFCommands.COM_QUIT:
+			currentState = OFFLINE;
+			break;
 		default:
 		}
+		
 
 	}
 

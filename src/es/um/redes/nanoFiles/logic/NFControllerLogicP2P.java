@@ -177,9 +177,6 @@ public class NFControllerLogicP2P {
 
 	protected boolean serving() {
 		boolean result = false;
-
-
-
 		return result;
 
 	}

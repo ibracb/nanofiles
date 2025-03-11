@@ -1,5 +1,7 @@
 package es.um.redes.nanoFiles.udp.message;
 
+import es.um.redes.nanoFiles.util.FileInfo;
+
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
  * implementar el explorador de ficheros remoto (servidor de ficheros). Estos
@@ -29,6 +31,11 @@ public class DirMessage {
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
 	private static final String FIELDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
+	private static final String FIELDNAME_FILELIST = "filelist";
+	private static final String FIELDNAME_SERVERPORT = "serverport";
+	
+
+
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
 	 */
@@ -45,6 +52,10 @@ public class DirMessage {
 	private String fileSize;
 	private String fileHash;
 	private String serverSocketAddresses;
+	private FileInfo[] fileList;
+	private int serverPort;
+	
+	
 	
 	/*
 	 * TODO: (Boletín MensajesASCII) Crear diferentes constructores adecuados para
@@ -59,6 +70,20 @@ public class DirMessage {
 		this.operation = operation;
 		this.protocolId = protocolId;
 	}
+	public DirMessage(String operation, String fileName, String fileSize, String fileHash, int serverPort, FileInfo[] fileList) {
+		 this.operation = operation;
+	     this.fileName = fileName;
+	     this.fileSize = fileSize;
+	     this.fileHash = fileHash;
+	     this.serverPort = serverPort;
+	     this.fileList = fileList;
+	}
+	public DirMessage(String operation, String fileName, String fileSize, String fileHash) {
+        this.operation = operation;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        this.fileHash = fileHash;
+    }
 	
 	public String getOperation() {
 		return operation;
@@ -131,6 +156,21 @@ public class DirMessage {
 		this.serverSocketAddresses = serverSocketAddresses;
 	}
 
+	public void setPort(int port) {
+	    this.serverPort = port;
+	}
+
+	public int getPort() {
+	    return serverPort;
+	}
+
+	public void setFileList(FileInfo[] files) {
+	    this.fileList = files;
+	}
+
+	public FileInfo[] getFileList() {
+	    return fileList;
+	}
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
 	 * un objeto de la clase PeerMessage, en el cual los atributos correspondientes
@@ -208,7 +248,7 @@ public class DirMessage {
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(FIELDNAME_OPERATION + DELIMITER + operation + END_LINE);
+		sb.append(FIELDNAME_OPERATION).append(DELIMITER).append(operation).append(END_LINE);
 		/*
 		 * TODO: (Boletín MensajesASCII) En función de la operación del mensaje, crear
 		 * una cadena la operación y concatenar el resto de campos necesarios usando los
@@ -218,6 +258,22 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_PING:
 			sb.append(FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE);
 			break;
+		case DirMessageOps.OPERATION_FILELIST:
+		case DirMessageOps.OPERATION_DOWNLOAD:
+			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);
+			sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(fileSize).append(END_LINE);
+			sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(fileHash).append(END_LINE);
+		case DirMessageOps.OPERATION_SERVE:
+			sb.append(FIELDNAME_SERVERSOCKETADDRESSES).append(DELIMITER).append(serverSocketAddresses).append(END_LINE);
+            break;
+		case DirMessageOps.OPERATION_REGISTER:
+			sb.append("port").append(DELIMITER).append(serverPort).append(END_LINE);
+		    for (FileInfo file : fileList) {
+		        sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
+		        sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
+		        sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
+		    }
+		    break;
 		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();
