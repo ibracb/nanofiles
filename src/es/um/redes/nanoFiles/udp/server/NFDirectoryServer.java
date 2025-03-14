@@ -194,7 +194,7 @@ public class NFDirectoryServer {
 		 * servidor.
 		 */
 		byte [] pktdata = pkt.getData();
-		String pktstr = new String(pktdata);
+		String pktstr = new String(pktdata, 0, pkt.getLength());
 		System.out.println(pktstr);
 		DirMessage dirpkt = DirMessage.fromString(pktstr);
 
