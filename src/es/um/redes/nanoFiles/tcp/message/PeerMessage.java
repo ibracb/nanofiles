@@ -18,6 +18,11 @@ public class PeerMessage {
 
 
 	private byte opcode;
+	private long fileOffset;   
+	private int chunkSize;   
+	private byte[] chunkData; 
+	private String fileName;  
+
 
 	/*
 	 * TODO: (Boletín MensajesBinarios) Añadir atributos u otros constructores

@@ -48,8 +48,6 @@ public class NFConnector {
 
 
 
-
-
 	public InetSocketAddress getServerAddr() {
 		return serverAddr;
 	}
