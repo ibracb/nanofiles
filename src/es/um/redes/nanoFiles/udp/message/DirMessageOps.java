@@ -13,6 +13,7 @@ public class DirMessageOps {
 	public static final String OPERATION_PING_DENIED = "ping_denied";
 	public static final String OPERATION_REGISTER = "register";
 	public static final String OPERATION_FILELIST = "filelist";
+	public static final String OPERATION_FILELIST_OK = "filelist_ok";
 	public static final String OPERATION_SERVE = "serve";
 	public static final String OPERATION_DOWNLOAD = "download";
 	

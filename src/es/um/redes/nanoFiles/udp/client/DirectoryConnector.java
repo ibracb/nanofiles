@@ -297,9 +297,6 @@ public class DirectoryConnector {
 	public FileInfo[] getFileList() {
 		FileInfo[] filelist = new FileInfo[0];
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
-
-
-
 		return filelist;
 	}
 

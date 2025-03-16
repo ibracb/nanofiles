@@ -258,7 +258,6 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_PING:
 			sb.append(FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE);
 			break;
-		case DirMessageOps.OPERATION_FILELIST:
 		case DirMessageOps.OPERATION_DOWNLOAD:
 			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);
 			sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(fileSize).append(END_LINE);
