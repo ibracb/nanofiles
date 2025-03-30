@@ -5,9 +5,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
+
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
+import es.um.redes.nanoFiles.util.FileInfo;
 
 public class NFDirectoryServer {
 	/**
@@ -25,10 +29,8 @@ public class NFDirectoryServer {
 	 * funcionalidad del sistema nanoFilesP2P: ficheros publicados, servidores
 	 * registrados, etc.
 	 */
-
-
-
-
+	private Map<String, FileInfo> publishedFiles;
+	
 	/**
 	 * Probabilidad de descartar un mensaje recibido en el directorio (para simular
 	 * enlace no confiable y testear el código de retransmisión)
@@ -51,9 +53,8 @@ public class NFDirectoryServer {
 		 * TODO: (Boletín SocketsUDP) Inicializar atributos que mantienen el estado del
 		 * servidor de directorio: ficheros, etc.)
 		 */
-
-
-
+		publishedFiles = new HashMap<String, FileInfo>();
+		
 		if (NanoFiles.testModeUDP) {
 			if (socket == null) {
 				System.err.println("[testMode] NFDirectoryServer: code not yet fully functional.\n"
@@ -248,9 +249,28 @@ public class NFDirectoryServer {
 
 			break;
 		}
+		
+		case DirMessageOps.OPERATION_FILELIST: {
+			StringBuilder fileListBuilder = new StringBuilder();
+			if (publishedFiles.isEmpty()) {
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_DENIED);
+			} else {
+				for (FileInfo file : publishedFiles.values()) {
+					fileListBuilder.append(file.fileName).append(",").append(file.fileHash).append(",")
+							.append(file.fileSize).append(",").append(file.filePath).append(";");
+				}
+				if (fileListBuilder.length() > 0) {
+					fileListBuilder.setLength(fileListBuilder.length() - 1);
+				}
 
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_OK);
 
-
+				msgToSend.setFiles(fileListBuilder.toString());
+				System.out.println("Response: " + msgToSend.toString());
+			}
+			break;
+		}
+		
 		default:
 			System.err.println("Unexpected message operation: \"" + operation + "\"");
 			System.exit(-1);

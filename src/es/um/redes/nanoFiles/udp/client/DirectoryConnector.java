@@ -295,10 +295,47 @@ public class DirectoryConnector {
 	 *         pudo satisfacer nuestra solicitud
 	 */
 	public FileInfo[] getFileList() {
-		FileInfo[] filelist = new FileInfo[0];
-		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
-		return filelist;
+	    DirMessage dirMessage = new DirMessage(DirMessageOps.OPERATION_FILELIST);
+	    byte[] dataToSend = dirMessage.toString().getBytes();
+	    byte[] receivedData = sendAndReceiveDatagrams(dataToSend);
+
+	    if (receivedData == null) {
+	        System.err.println("No data received from the server.");
+	        return new FileInfo[0];
+	    }
+
+	    String messageResponse = new String(receivedData, 0, receivedData.length);
+	    DirMessage responseMessage = DirMessage.fromString(messageResponse);
+
+	    if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_OK) && messageResponse.length() > 0) {
+	        if (responseMessage.getFiles() == null) {
+	            System.err.println("File attributes are missing in the response.");
+	            return new FileInfo[0];
+	        }
+
+	        String[] files = responseMessage.getFiles().split(";");
+	        FileInfo[] filelist = new FileInfo[files.length];
+
+	        for (int i = 0; i < files.length; i++) {
+	            String[] fileParts = files[i].split(",");
+	            if (fileParts.length == 4) {
+	                filelist[i] = new FileInfo(fileParts[1], fileParts[0], Long.parseLong(fileParts[2]), fileParts[3]);
+	            } else {
+	                System.err.println("Invalid file data format: " + files[i]);
+	                filelist[i] = null;  // Assigning null to this entry in case of format error.
+	            }
+	        }
+
+	        return filelist;
+	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_DENIED)) {
+	        System.err.println("Empty list.");
+	        return new FileInfo[0];
+	    }
+
+	    System.err.println("Invalid operation response: " + responseMessage.getOperation());
+	    return new FileInfo[0];
 	}
+
 
 	/**
 	 * Método para obtener la lista de servidores que tienen un fichero cuyo nombre

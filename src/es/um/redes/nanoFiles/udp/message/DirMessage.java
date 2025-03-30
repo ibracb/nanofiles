@@ -1,5 +1,7 @@
 package es.um.redes.nanoFiles.udp.message;
 
+import java.io.File;
+
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -54,6 +56,7 @@ public class DirMessage {
 	private String serverSocketAddresses;
 	private FileInfo[] fileList;
 	private int serverPort;
+	private String files;
 	
 	
 	
@@ -171,6 +174,16 @@ public class DirMessage {
 	public FileInfo[] getFileList() {
 	    return fileList;
 	}
+	
+	public String getFiles() {
+		return files;
+	}
+	
+	public void setFiles(String files) {
+		assert (operation.equals(DirMessageOps.OPERATION_FILELIST_OK));
+		this.files = files;
+	}
+	
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
 	 * un objeto de la clase PeerMessage, en el cual los atributos correspondientes
