@@ -251,8 +251,8 @@ public class DirectoryConnector {
 			
 			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_WELCOME)) {
 				return true;
-			}
-			return false;
+			}else {
+			return false;}
 		}catch(Exception e) {
 			return false;
 		}

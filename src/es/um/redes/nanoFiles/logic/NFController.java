@@ -114,6 +114,12 @@ public class NFController {
 			 * Pedir al controllerDir enviar un "ping" al directorio, para comprobar que
 			 * está activo y disponible, y comprobar que es compatible.
 			 */
+			String [] protocolid = shell.getCommandArguments();
+			String arg = protocolid[0];
+			if(!arg.equals(NanoFiles.PROTOCOL_ID)) {
+				commandSucceeded = false;
+				
+			}
 			commandSucceeded = controllerDir.ping();
 			break;
 		case NFCommands.COM_FILELIST:
@@ -230,6 +236,7 @@ public class NFController {
 			break;
 		case NFCommands.COM_QUIT:
 			commandAllowed = true;
+			break;
 		default:
 			System.err.println("ERROR: undefined behaviour for " + currentCommand + "command!");
 		}

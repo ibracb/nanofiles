@@ -107,9 +107,10 @@ public class NFShell {
 			case NFCommands.COM_FILELIST:
 			case NFCommands.COM_MYFILES:
 			case NFCommands.COM_SERVE:
-			case NFCommands.COM_PING:
+			
 				// Estos comandos son válidos sin parámetros
 				break;
+			case NFCommands.COM_PING:
 			case NFCommands.COM_DOWNLOAD:
 			case NFCommands.COM_UPLOAD:
 				// Estos requieren un parámetro
@@ -147,6 +148,12 @@ public class NFShell {
 				return false;
 			}
 			break;
+		case NFCommands.COM_PING:
+			if (args.length != 1) {
+				System.out.println(
+						"Correct use:" + NFCommands.commandToString(command) + " <protocolId>");
+				return false;
+			}
 		default:
 		}
 		// El resto no requieren parámetro
