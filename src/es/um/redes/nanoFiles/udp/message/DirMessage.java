@@ -218,10 +218,12 @@ public class DirMessage {
 					break;
 				}
 				case FIELDNAME_PROTOCOL: {
-					assert (m!=null);
-					m.setProtocolID(value);
-					break;
-				}
+	                assert (m != null);
+	                if (m.getOperation().equals(DirMessageOps.OPERATION_PING)) {
+	                    m.setProtocolID(value);
+	                }
+	                break;
+	            }
 				case FIELDNAME_FILENAME: {
 					assert (m!=null);
 					m.setFileName(value);
@@ -230,6 +232,7 @@ public class DirMessage {
 				case FIELDNAME_FILESIZE: {
 					assert(m!=null);
 					m.setFileSize(value);
+					break;
 				}
 				case FIELDNAME_FILEHASH: {
 					assert(m!=null);
