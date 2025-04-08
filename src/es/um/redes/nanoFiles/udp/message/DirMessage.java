@@ -232,22 +232,15 @@ public class DirMessage {
 					m.setPort(aux);
 					break;
 				}
-				case FIELDNAME_FILES:{
-					
-					break;
-				}
 				case FIELDNAME_FILENAME: {
-					assert (m!=null);
 					m.setFileName(value);
 					break;
 				}
 				case FIELDNAME_FILESIZE: {
-					assert(m!=null);
 					m.setFileSize(value);
 					break;
 				}
 				case FIELDNAME_FILEHASH: {
-					assert(m!=null);
 					m.setFileHash(value);
 					break;
 				}

@@ -115,7 +115,7 @@ public class NFController {
 			 * está activo y disponible, y comprobar que es compatible.
 			 */
 			String [] args = shell.getCommandArguments();
-			String protocolId = args[0];
+			protocolId = args[0];
 			commandSucceeded = controllerDir.ping(protocolId);
 			break;
 		case NFCommands.COM_FILELIST:

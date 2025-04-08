@@ -51,10 +51,39 @@ public class NFControllerLogicP2P {
 			 * programa
 			 * 
 			 */
+			try {
+	            // Crear el servidor de ficheros en un puerto válido
+	            fileServer = new NFServer(); // Suponiendo que este constructor inicia el servidor
+
+	            // Arrancar el servidor en un nuevo hilo
+	            Thread serverThread = new Thread(new Runnable() {
+	                @Override
+	                public void run() {
+	                    // Iniciar el servidor en segundo plano
+						fileServer.test();  // Este método debe estar en NFServer para iniciar el servidor en modo "test"
+	                }
+	            });
+
+	            serverThread.setDaemon(true); // Configurar el hilo como daemon (opcional, si quieres que el servidor se cierre cuando el programa principal se cierre)
+	            serverThread.start(); // Iniciar el hilo del servidor
+
+	            // Verificar que el servidor está escuchando en un puerto válido
+	            if (fileServer.getPort() > 0) {
+	                System.out.println("File server is running on port: " + fileServer.getPort());
+	                serverRunning = true;
+	            } else {
+	                System.err.println("Error: Server not listening on a valid port.");
+	            }
+
+	        } catch (Exception e) {
+	            System.err.println("Error starting file server: " + e.getMessage());
+	        }
+	    }
+
+			
 
 
 
-		}
 		return serverRunning;
 
 	}

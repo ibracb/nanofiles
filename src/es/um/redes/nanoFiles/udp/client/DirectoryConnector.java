@@ -275,7 +275,7 @@ public class DirectoryConnector {
 
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
 		try {
-			DirMessage message = new DirMessage(DirMessageOps.OPERATION_REGISTER,  serverPort, files);
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_SERVE,  serverPort, files);
 			String messageStr = message.toString();
 			byte[] messageBytes = messageStr.getBytes();
 			byte[] response = sendAndReceiveDatagrams(messageBytes);
@@ -284,13 +284,17 @@ public class DirectoryConnector {
 			}
 			String responseToString = new String(response).trim();
 			DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
-			
+			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_SERVE_DENIED)){
+				return false;
+
+			}
+			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_SERVE_OK)) {
+				return true;
+			}else {
+			return false;}
 		} catch (Exception e) {
-			// TODO: handle exception
+			
 		}
-
-
-
 		return success;
 	}
 

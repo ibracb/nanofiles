@@ -16,6 +16,8 @@ public class DirMessageOps {
 	public static final String OPERATION_FILELIST_OK = "filelist_ok";
 	public static final String OPERATION_FILELIST_DENIED = "filelist_denied";
 	public static final String OPERATION_SERVE = "serve";
+	public static final String OPERATION_SERVE_DENIED = "serve-denied";
+	public static final String OPERATION_SERVE_OK = "serve_ok";
 	public static final String OPERATION_DOWNLOAD = "download";
 	
 }
