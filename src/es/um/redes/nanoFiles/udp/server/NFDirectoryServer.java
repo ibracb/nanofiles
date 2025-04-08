@@ -215,7 +215,7 @@ public class NFDirectoryServer {
 		 * contendrán los valores adecuados para los diferentes campos del mensaje a
 		 * enviar como respuesta (operation, etc.)
 		 */
-		DirMessage msgToSend = null;
+		DirMessage msgToSend=null;
 
 
 

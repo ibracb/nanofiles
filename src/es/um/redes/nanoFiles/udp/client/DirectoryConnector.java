@@ -226,7 +226,7 @@ public class DirectoryConnector {
 	 * 
 	 * @return Verdadero si el directorio está operativo y es compatible
 	 */
-	public boolean pingDirectory() {
+	public boolean pingDirectory(String protocolId) {
 		/*
 		 * TODO: (Boletín MensajesASCII) Hacer ping al directorio 1.Crear el mensaje a
 		 * enviar (objeto DirMessage) con atributos adecuados (operation, etc.) NOTA:
@@ -239,7 +239,7 @@ public class DirectoryConnector {
 		 * de la operación
 		 */
 		try {
-			DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, NanoFiles.PROTOCOL_ID);
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, protocolId);
 			String messageStr = message.toString();
 			byte[] messageBytes = messageStr.getBytes();
 			byte[] response = sendAndReceiveDatagrams(messageBytes);
@@ -248,7 +248,10 @@ public class DirectoryConnector {
 			}
 			String responseToString = new String(response).trim();
 			DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
-			
+			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_DENIED)){
+				return false;
+
+			}
 			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_PING_WELCOME)) {
 				return true;
 			}else {

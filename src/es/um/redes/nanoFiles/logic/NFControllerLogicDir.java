@@ -76,7 +76,7 @@ public class NFControllerLogicDir {
 	 * 
 	 * @return true si se ha conseguido contactar con el directorio.
 	 */
-	protected boolean ping() {
+	protected boolean ping(String protocolId) {
 
 		/*
 		 * (Boletín SocketsUDP) Utilizar el DirectoryConnector para comunicarse con el
@@ -86,7 +86,7 @@ public class NFControllerLogicDir {
 		boolean result = false;
 		System.out.println(
 				"* Checking if the directory at " + directoryConnector.getDirectoryHostname() + " is available...");
-		result = directoryConnector.pingDirectory();
+		result = directoryConnector.pingDirectory(protocolId);
 		if (result) {
 			System.out.println("* Directory is active and uses compatible protocol " + NanoFiles.PROTOCOL_ID);
 		} else {

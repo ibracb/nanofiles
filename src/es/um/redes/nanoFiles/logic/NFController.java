@@ -58,7 +58,7 @@ public class NFController {
 	private String targetFilenameSubstring; // Nombre del fichero a descargar/subir (download/upload)
 	private String downloadLocalFileName; // Nombre con el que se guardará el fichero descargado (download)
 	private String uploadToServer; // Servidor al que se subirá el fichero indicado (upload)
-
+	private String protocolId;//ProtocoloID introducido por el cliente
 	// Constructor
 	public NFController(String defaultDirectory) {
 		shell = new NFShell();
@@ -114,13 +114,9 @@ public class NFController {
 			 * Pedir al controllerDir enviar un "ping" al directorio, para comprobar que
 			 * está activo y disponible, y comprobar que es compatible.
 			 */
-			String [] protocolid = shell.getCommandArguments();
-			String arg = protocolid[0];
-			if(!arg.equals(NanoFiles.PROTOCOL_ID)) {
-				commandSucceeded = false;
-				
-			}
-			commandSucceeded = controllerDir.ping();
+			String [] args = shell.getCommandArguments();
+			String protocolId = args[0];
+			commandSucceeded = controllerDir.ping(protocolId);
 			break;
 		case NFCommands.COM_FILELIST:
 			/*

@@ -103,7 +103,7 @@ public class DirMessage {
 			throw new RuntimeException(
 					"DirMessage: setProtocolId called for message of unexpected type (" + operation + ")");
 		}
-		protocolId = protocolIdent;
+		this.protocolId = protocolIdent;
 	}
 
 	public String getProtocolId() {
