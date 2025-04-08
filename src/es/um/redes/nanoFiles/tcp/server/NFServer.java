@@ -10,9 +10,6 @@ import java.net.Socket;
 public class NFServer implements Runnable {
 
 	public static final int PORT = 10000;
-
-
-
 	private ServerSocket serverSocket = null;
 
 	public NFServer() throws IOException {
@@ -20,6 +17,7 @@ public class NFServer implements Runnable {
 		 * TODO: (Boletín SocketsTCP) Crear una direción de socket a partir del puerto
 		 * especificado (PORT)
 		 */
+		serverSocket = new ServerSocket(PORT);
 		/*
 		 * TODO: (Boletín SocketsTCP) Crear un socket servidor y ligarlo a la dirección
 		 * de socket anterior
@@ -50,12 +48,20 @@ public class NFServer implements Runnable {
 			 * TODO: (Boletín SocketsTCP) Usar el socket servidor para esperar conexiones de
 			 * otros peers que soliciten descargar ficheros.
 			 */
+			try {
+				Socket clientSocket = serverSocket.accept();
 			/*
 			 * TODO: (Boletín SocketsTCP) Tras aceptar la conexión con un peer cliente, la
 			 * comunicación con dicho cliente para servir los ficheros solicitados se debe
 			 * implementar en el método serveFilesToClient, al cual hay que pasarle el
 			 * socket devuelto por accept.
-			 */
+			 * 				 
+			 */	
+				serveFilesToClient(clientSocket);
+			}catch(IOException e){
+				System.err.println("Error while accepting client connection: " + e.getMessage());
+			}
+			
 
 
 
@@ -87,6 +93,22 @@ public class NFServer implements Runnable {
 		 * hilo es el que se encarga de atender al cliente conectado, no podremos tener
 		 * más de un cliente conectado a este servidor.
 		 */
+		
+		while (true) {
+            try {
+                // Esperar conexiones de clientes
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("New client connected: " + clientSocket.getInetAddress());
+
+                // Crear un nuevo hilo para manejar la comunicación con el cliente
+                NFServerThread serverThread = new NFServerThread(clientSocket, this);
+                serverThread.start();  // Iniciar el hilo para la comunicación con el cliente
+
+            } catch (IOException e) {
+                System.err.println("Error while accepting client connection: " + e.getMessage());
+                break;  // Si ocurre un error, salir del bucle de escucha
+            }
+        }
 
 
 
@@ -97,7 +119,25 @@ public class NFServer implements Runnable {
 	 * servidor en un hilo nuevo que se ejecutará en segundo plano 2) Detener el
 	 * servidor (stopserver) 3) Obtener el puerto de escucha del servidor etc.
 	 */
-
+	
+	//Método para arrancar el servidor en un hilo nuevo
+	public void startServer() {
+        Thread serverThread = new Thread(this);  
+        serverThread.start();  
+    }
+	
+	// Método para detener el servidor
+    public void stopServer() throws IOException {
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            serverSocket.close();  
+            System.out.println("Server stopped.");
+        }
+    }
+    
+    //Método para obtener el puerto de escucha del servidor
+    public int getPort() {
+		return serverSocket.getLocalPort();
+	}
 
 
 
@@ -108,32 +148,17 @@ public class NFServer implements Runnable {
 	 * @param socket El socket para la comunicación con un cliente que desea
 	 *               descargar ficheros.
 	 */
-	public static void serveFilesToClient(Socket socket) {
-		/*
-		 * TODO: (Boletín SocketsTCP) Crear dis/dos a partir del socket
-		 */
-		/*
-		 * TODO: (Boletín SocketsTCP) Mientras el cliente esté conectado, leer mensajes
-		 * de socket, convertirlo a un objeto PeerMessage y luego actuar en función del
-		 * tipo de mensaje recibido, enviando los correspondientes mensajes de
-		 * respuesta.
-		 */
-		/*
-		 * TODO: (Boletín SocketsTCP) Para servir un fichero, hay que localizarlo a
-		 * partir de su hash (o subcadena) en nuestra base de datos de ficheros
-		 * compartidos. Los ficheros compartidos se pueden obtener con
-		 * NanoFiles.db.getFiles(). Los métodos lookupHashSubstring y
-		 * lookupFilenameSubstring de la clase FileInfo son útiles para buscar ficheros
-		 * coincidentes con una subcadena dada del hash o del nombre del fichero. El
-		 * método lookupFilePath() de FileDatabase devuelve la ruta al fichero a partir
-		 * de su hash completo.
-		 */
+	public static void serveFilesToClient(Socket socket) throws IOException {
+		System.out.println("Serving files to client: " + socket.getInetAddress());
+		}
+		
 
-
-
-	}
-
-
+    
+	
 
 
 }
+
+
+
+

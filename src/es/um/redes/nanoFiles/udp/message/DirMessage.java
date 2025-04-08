@@ -33,6 +33,7 @@ public class DirMessage {
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
 	private static final String FIELDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
+	private static final String FIELDNAME_FILES = "files";
 	private static final String FIELDNAME_FILELIST = "filelist";
 	private static final String FIELDNAME_SERVERPORT = "serverport";
 	
@@ -72,6 +73,11 @@ public class DirMessage {
 	public DirMessage(String operation, String protocolId) {
 		this.operation = operation;
 		this.protocolId = protocolId;
+	}
+	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
+		this.operation = operation;
+		this.serverPort = serverPort;
+	    this.fileList = fileList;
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash, int serverPort, FileInfo[] fileList) {
 		 this.operation = operation;
@@ -218,12 +224,18 @@ public class DirMessage {
 					break;
 				}
 				case FIELDNAME_PROTOCOL: {
-	                assert (m != null);
-	                if (m.getOperation().equals(DirMessageOps.OPERATION_PING)) {
-	                    m.setProtocolID(value);
-	                }
+	                m.setProtocolID(value);
 	                break;
 	            }
+				case FIELDNAME_SERVERPORT:{
+					int aux=Integer.parseInt(value);
+					m.setPort(aux);
+					break;
+				}
+				case FIELDNAME_FILES:{
+					
+					break;
+				}
 				case FIELDNAME_FILENAME: {
 					assert (m!=null);
 					m.setFileName(value);

@@ -275,9 +275,15 @@ public class DirectoryConnector {
 
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
 		try {
-			DirMessage message = new DirMessage(DirMessageOps.OPERATION_REGISTER, NanoFiles.PROTOCOL_ID);
-	        message.setPort(serverPort);
-	        message.setFileList(files);
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_REGISTER,  serverPort, files);
+			String messageStr = message.toString();
+			byte[] messageBytes = messageStr.getBytes();
+			byte[] response = sendAndReceiveDatagrams(messageBytes);
+			if (response == null || response.length == 0) {
+				return false;
+			}
+			String responseToString = new String(response).trim();
+			DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
 			
 		} catch (Exception e) {
 			// TODO: handle exception
