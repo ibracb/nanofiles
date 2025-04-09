@@ -263,6 +263,7 @@ public class NFDirectoryServer {
 				registeredServers.put(dirpkt.getServerSocketAddress(), dirpkt.getFileList());
 				
 			}
+			System.out.println(msgToSend.toString());
 			break;
 		}
 		
