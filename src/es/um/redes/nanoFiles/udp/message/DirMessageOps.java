@@ -15,9 +15,12 @@ public class DirMessageOps {
 	public static final String OPERATION_FILELIST = "filelist";
 	public static final String OPERATION_FILELIST_OK = "filelist_ok";
 	public static final String OPERATION_FILELIST_DENIED = "filelist_denied";
-	public static final String OPERATION_SERVE = "serve";
-	public static final String OPERATION_SERVE_DENIED = "serve-denied";
-	public static final String OPERATION_SERVE_OK = "serve_ok";
+	public static final String OPERATION_FILELIST_EMPTY = "filelist_empty";
+	public static final String OPERATION_REGISTER_DENIED = "register-denied";
+	public static final String OPERATION_REGISTER_OK = "register_ok";
 	public static final String OPERATION_DOWNLOAD = "download";
+	public static final String OPERATION_SERVERS_SHARING_FILE = "servers_sharing_file";
+	public static final String OPERATION_SERVERS_SHARING_FILE_OK = "servers_sharing_file_ok";
+	public static final String OPERATION_SERVERS_SHARING_FILE_DENIED = "servers_sharing_file_denied";
 	
 }

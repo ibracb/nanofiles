@@ -18,7 +18,8 @@ import es.um.redes.nanoFiles.util.FileDigest;
 public class NFConnector {
 	private Socket socket;
 	private InetSocketAddress serverAddr;
-
+	private DataInputStream dis;
+	private DataOutputStream dos;
 
 
 
@@ -29,12 +30,14 @@ public class NFConnector {
 		 * servidor (IP, puerto). La creación exitosa del socket significa que la
 		 * conexión TCP ha sido establecida.
 		 */
+		socket = new Socket(serverAddr.getAddress(), serverAddr.getPort());
 		/*
 		 * TODO: (Boletín SocketsTCP) Se crean los DataInputStream/DataOutputStream a
 		 * partir de los streams de entrada/salida del socket creado. Se usarán para
 		 * enviar (dos) y recibir (dis) datos del servidor.
 		 */
-
+		dis = new DataInputStream(socket.getInputStream());
+	    dos = new DataOutputStream(socket.getOutputStream());
 
 
 	}
@@ -44,6 +47,22 @@ public class NFConnector {
 		 * TODO: (Boletín SocketsTCP) Enviar entero cualquiera a través del socket y
 		 * después recibir otro entero, comprobando que se trata del mismo valor.
 		 */
+		try {
+	        int valueToSend = 12345; 
+	        dos.writeInt(valueToSend); 
+	        //dos.flush(); 
+
+	        int receivedValue = dis.readInt(); 
+
+	        if (valueToSend == receivedValue) {
+	            System.out.println("Test passed: received the same integer " + receivedValue);
+	        } else {
+	            System.err.println("Test failed: sent " + valueToSend + ", received " + receivedValue);
+	        }
+
+	    } catch (IOException e) {
+	        System.err.println("Test failed due to IO exception: " + e.getMessage());
+	    }
 	}
 
 

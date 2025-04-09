@@ -25,7 +25,9 @@ public class PeerMessage {
 	private long fileOffset;   //byte de inicio
 	private int chunkSize;   
 	private byte[] chunkData; 
-	private String fileName;  
+	private String fileName; 
+	private int fileSize;
+	
 
 
 	public PeerMessage() {
@@ -133,6 +135,12 @@ public class PeerMessage {
 	    this.fileName = fileName;
 	}
 
+	public int getFileSize() {
+		return fileSize;
+	}
+	public void setFileSize(int fileSize) {
+		this.fileSize = fileSize;
+	}
 
 
 	/**

@@ -1,6 +1,7 @@
 package es.um.redes.nanoFiles.tcp.server;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -9,7 +10,7 @@ import java.net.Socket;
 
 public class NFServer implements Runnable {
 
-	public static final int PORT = 10000;
+	public static final int PORT = 0;
 	private ServerSocket serverSocket = null;
 
 	public NFServer() throws IOException {
@@ -17,7 +18,8 @@ public class NFServer implements Runnable {
 		 * TODO: (Boletín SocketsTCP) Crear una direción de socket a partir del puerto
 		 * especificado (PORT)
 		 */
-		serverSocket = new ServerSocket(PORT);
+		serverSocket = new ServerSocket();
+		serverSocket.bind(new InetSocketAddress(PORT));
 		/*
 		 * TODO: (Boletín SocketsTCP) Crear un socket servidor y ligarlo a la dirección
 		 * de socket anterior
@@ -150,7 +152,7 @@ public class NFServer implements Runnable {
 	 */
 	public static void serveFilesToClient(Socket socket) throws IOException {
 		System.out.println("Serving files to client: " + socket.getInetAddress());
-		}
+	}
 		
 
     

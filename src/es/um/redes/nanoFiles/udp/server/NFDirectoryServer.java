@@ -30,6 +30,7 @@ public class NFDirectoryServer {
 	 * registrados, etc.
 	 */
 	private Map<String, FileInfo> publishedFiles;
+	public static Map<InetSocketAddress, FileInfo[]> registeredServers;
 	
 	/**
 	 * Probabilidad de descartar un mensaje recibido en el directorio (para simular
@@ -54,7 +55,8 @@ public class NFDirectoryServer {
 		 * servidor de directorio: ficheros, etc.)
 		 */
 		publishedFiles = new HashMap<String, FileInfo>();
-		
+		registeredServers = new HashMap<InetSocketAddress, FileInfo[]>();
+	
 		if (NanoFiles.testModeUDP) {
 			if (socket == null) {
 				System.err.println("[testMode] NFDirectoryServer: code not yet fully functional.\n"
@@ -249,6 +251,20 @@ public class NFDirectoryServer {
 
 			break;
 		}
+		case DirMessageOps.OPERATION_REGISTER:{
+			int port=dirpkt.getPort();
+			if(registeredServers.containsKey(dirpkt.getPort())&&registeredServers.get(port).equals(dirpkt.getFileList())){
+				
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
+				}
+				
+			else {
+				registeredServers.put(dirpkt.getServerSocketAddress(), dirpkt.getFileList());
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
+			}
+			
+		}
+		
 		
 		case DirMessageOps.OPERATION_FILELIST: {
 			StringBuilder fileListBuilder = new StringBuilder();

@@ -275,7 +275,7 @@ public class DirectoryConnector {
 
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
 		try {
-			DirMessage message = new DirMessage(DirMessageOps.OPERATION_SERVE,  serverPort, files);
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_REGISTER,  serverPort, files);
 			String messageStr = message.toString();
 			byte[] messageBytes = messageStr.getBytes();
 			byte[] response = sendAndReceiveDatagrams(messageBytes);
@@ -284,14 +284,13 @@ public class DirectoryConnector {
 			}
 			String responseToString = new String(response).trim();
 			DirMessage responseToDirMessage = DirMessage.fromString(responseToString); 
-			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_SERVE_DENIED)){
+			if(responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_REGISTER_DENIED)){
 				return false;
 
 			}
-			if(responseToDirMessage!=null && responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_SERVE_OK)) {
+			else{//(responseToDirMessage.getOperation().equals(DirMessageOps.OPERATION_REGISTER_OK)) {
 				return true;
-			}else {
-			return false;}
+			}
 		} catch (Exception e) {
 			
 		}
@@ -340,7 +339,7 @@ public class DirectoryConnector {
 	        }
 
 	        return filelist;
-	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_DENIED)) {
+	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_EMPTY)) {
 	        System.err.println("Empty list.");
 	        return new FileInfo[0];
 	    }
@@ -363,6 +362,7 @@ public class DirectoryConnector {
 	public InetSocketAddress[] getServersSharingThisFile(String filenameSubstring) {
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
 		InetSocketAddress[] serversList = new InetSocketAddress[0];
+		
 
 
 

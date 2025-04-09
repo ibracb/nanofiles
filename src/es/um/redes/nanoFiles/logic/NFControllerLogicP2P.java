@@ -185,10 +185,11 @@ public class NFControllerLogicP2P {
 		/*
 		 * TODO: Devolver el puerto de escucha de nuestro servidor de ficheros
 		 */
+		if (fileServer != null) {
+	        port = fileServer.getPort(); 
+	    }
 
-
-
-		return port;
+	    return port;
 	}
 
 	/**
@@ -199,6 +200,17 @@ public class NFControllerLogicP2P {
 		/*
 		 * TODO: Enviar señal para detener nuestro servidor de ficheros en segundo plano
 		 */
+		if (fileServer != null) {
+	        try {
+	            fileServer.stopServer();  
+	            fileServer = null;        
+	            System.out.println("File server stopped.");
+	        } catch (IOException e) {
+	            System.err.println("Error while stopping file server: " + e.getMessage());
+	        }
+	    } else {
+	        System.err.println("File server is not running.");
+	    }
 
 
 

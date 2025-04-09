@@ -1,6 +1,7 @@
 package es.um.redes.nanoFiles.udp.message;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 
 import es.um.redes.nanoFiles.util.FileInfo;
 
@@ -32,12 +33,8 @@ public class DirMessage {
 	private static final String FIELDNAME_FILENAME = "filename";
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
-	private static final String FIELDNAME_SERVERSOCKETADDRESSES = "server socket addresses";
-	private static final String FIELDNAME_FILES = "files";
-	private static final String FIELDNAME_FILELIST = "filelist";
+	private static final String FIELDNAME_ADRESS = "adress";
 	private static final String FIELDNAME_SERVERPORT = "serverport";
-	
-
 
 	/**
 	 * Tipo del mensaje, de entre los tipos definidos en PeerMessageOps.
@@ -54,7 +51,7 @@ public class DirMessage {
 	private String fileName;
 	private String fileSize;
 	private String fileHash;
-	private String serverSocketAddresses;
+	private InetSocketAddress serverSocketAddress;
 	private FileInfo[] fileList;
 	private int serverPort;
 	private String files;
@@ -153,16 +150,16 @@ public class DirMessage {
 		this.fileHash = fileHash;
 	}
 
-	public String getServerSocketAddresses() {
-		return serverSocketAddresses;
+	public InetSocketAddress getServerSocketAddress() {
+		return serverSocketAddress;
 	}
 
-	public void setServerSocketAddresses(String serverSocketAddresses) {
+	public void setServerSocketAddress(InetSocketAddress serverSocketAddress) {
 		/*if(!operation.equals(DirMessageOps)) {
 			throw new RuntimeException(
 					"DirMessage: setServerSocketAddresses called for message of unexpected type (" + operation + ")");
 		}*/
-		this.serverSocketAddresses = serverSocketAddresses;
+		this.serverSocketAddress = serverSocketAddress;
 	}
 
 	public void setPort(int port) {
@@ -224,7 +221,7 @@ public class DirMessage {
 					break;
 				}
 				case FIELDNAME_PROTOCOL: {
-	                m.setProtocolID(value);
+					m.setProtocolID(value);
 	                break;
 	            }
 				case FIELDNAME_SERVERPORT:{
@@ -244,9 +241,14 @@ public class DirMessage {
 					m.setFileHash(value);
 					break;
 				}
-				case FIELDNAME_SERVERSOCKETADDRESSES: {
+				case FIELDNAME_ADRESS: {
 					assert(m!=null);
-					m.setServerSocketAddresses(value);
+					String[] parts = value.split(":");
+					String host = parts[0];
+					int port = Integer.parseInt(parts[1]);
+
+					InetSocketAddress address = new InetSocketAddress(host, port);
+					m.setServerSocketAddress(address);
 					break;
 				}
 				
@@ -279,21 +281,22 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_PING:
 			sb.append(FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE);
 			break;
+		
 		case DirMessageOps.OPERATION_DOWNLOAD:
 			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);
 			sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(fileSize).append(END_LINE);
 			sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(fileHash).append(END_LINE);
-		case DirMessageOps.OPERATION_SERVE:
-			sb.append(FIELDNAME_SERVERSOCKETADDRESSES).append(DELIMITER).append(serverSocketAddresses).append(END_LINE);
-            break;
 		case DirMessageOps.OPERATION_REGISTER:
-			sb.append("port").append(DELIMITER).append(serverPort).append(END_LINE);
+			sb.append(FIELDNAME_SERVERPORT).append(DELIMITER).append(serverPort).append(END_LINE);
 		    for (FileInfo file : fileList) {
 		        sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
 		        sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
 		        sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
 		    }
 		    break;
+		case DirMessageOps.OPERATION_FILELIST:
+				
+			    break;
 		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();

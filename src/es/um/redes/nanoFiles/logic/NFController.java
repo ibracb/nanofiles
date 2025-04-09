@@ -59,6 +59,7 @@ public class NFController {
 	private String downloadLocalFileName; // Nombre con el que se guardará el fichero descargado (download)
 	private String uploadToServer; // Servidor al que se subirá el fichero indicado (upload)
 	private String protocolId;//ProtocoloID introducido por el cliente
+	private String port;//puerto efímero introducido como parámetro
 	// Constructor
 	public NFController(String defaultDirectory) {
 		shell = new NFShell();
