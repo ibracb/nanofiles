@@ -252,15 +252,16 @@ public class NFDirectoryServer {
 			break;
 		}
 		case DirMessageOps.OPERATION_REGISTER:{
-			int port=dirpkt.getPort();
-			if(registeredServers.containsKey(dirpkt.getPort())&&registeredServers.get(port).equals(dirpkt.getFileList())){
+			InetSocketAddress adress=dirpkt.getServerSocketAddress();
+			if(registeredServers.containsKey(adress)&&registeredServers.get(adress).equals(dirpkt.getFileList())){
 				
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
 				}
 				
 			else {
-				registeredServers.put(dirpkt.getServerSocketAddress(), dirpkt.getFileList());
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
+				registeredServers.put(dirpkt.getServerSocketAddress(), dirpkt.getFileList());
+				
 			}
 			
 		}
