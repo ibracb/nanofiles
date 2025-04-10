@@ -11,15 +11,13 @@ public class NFServerThread extends Thread {
 	 * (un socket distinto para "conversar" con un cliente)
 	 */
 	private Socket clientSocket; 
-    private NFServer nfServer;
-    public NFServerThread(Socket clientSocket, NFServer nfServer) {
+    public NFServerThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.nfServer = nfServer;
     }
     @Override
     public void run() {
         try {
-            nfServer.serveFilesToClient(clientSocket);
+            NFServer.serveFilesToClient(clientSocket);
         } catch (IOException e) {
             System.err.println("Error while serving client: " + e.getMessage());
         } finally {

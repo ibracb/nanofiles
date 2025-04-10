@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
@@ -29,7 +30,7 @@ public class NFDirectoryServer {
 	 * funcionalidad del sistema nanoFilesP2P: ficheros publicados, servidores
 	 * registrados, etc.
 	 */
-	private Map<String, FileInfo> publishedFiles;
+	private Map<InetSocketAddress, FileInfo[]> publishedFiles;
 	public static Map<InetSocketAddress, FileInfo[]> registeredServers;
 	
 	/**
@@ -54,7 +55,7 @@ public class NFDirectoryServer {
 		 * TODO: (Boletín SocketsUDP) Inicializar atributos que mantienen el estado del
 		 * servidor de directorio: ficheros, etc.)
 		 */
-		publishedFiles = new HashMap<String, FileInfo>();
+		publishedFiles = new HashMap<InetSocketAddress, FileInfo[]>();
 		registeredServers = new HashMap<InetSocketAddress, FileInfo[]>();
 	
 		if (NanoFiles.testModeUDP) {
@@ -252,16 +253,17 @@ public class NFDirectoryServer {
 			break;
 		}
 		case DirMessageOps.OPERATION_REGISTER:{
-			InetSocketAddress adress=dirpkt.getServerSocketAddress();
-			if(registeredServers.containsKey(adress)&&registeredServers.get(adress).equals(dirpkt.getFileList())){
+			InetSocketAddress address=dirpkt.getServerSocketAddress();
+			FileInfo [] files= dirpkt.getFileList();
+			if(registeredServers.containsKey(address)&&registeredServers.get(address).equals(files)){
 				
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
 				}
 				
 			else {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
-				registeredServers.put(dirpkt.getServerSocketAddress(), dirpkt.getFileList());
-				
+				registeredServers.put(address, files);
+				publishedFiles.put(address,files);
 			}
 			System.out.println(msgToSend.toString());
 			break;
@@ -273,10 +275,13 @@ public class NFDirectoryServer {
 			if (publishedFiles.isEmpty()) {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_DENIED);
 			} else {
-				for (FileInfo file : publishedFiles.values()) {
-					fileListBuilder.append(file.fileName).append(",").append(file.fileHash).append(",")
-							.append(file.fileSize).append(",").append(file.filePath).append(";");
+				for (FileInfo[] fileArray : publishedFiles.values()) {
+					for (FileInfo file : fileArray) {
+						fileListBuilder.append(file.fileName).append(",").append(file.fileHash).append(",")
+								.append(file.fileSize).append(",").append(file.filePath).append(";");
+					}
 				}
+				
 				if (fileListBuilder.length() > 0) {
 					fileListBuilder.setLength(fileListBuilder.length() - 1);
 				}

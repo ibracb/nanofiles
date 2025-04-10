@@ -103,7 +103,7 @@ public class NFServer implements Runnable {
                 System.out.println("New client connected: " + clientSocket.getInetAddress());
 
                 // Crear un nuevo hilo para manejar la comunicación con el cliente
-                NFServerThread serverThread = new NFServerThread(clientSocket, this);
+                NFServerThread serverThread = new NFServerThread(clientSocket);
                 serverThread.start();  // Iniciar el hilo para la comunicación con el cliente
 
             } catch (IOException e) {
