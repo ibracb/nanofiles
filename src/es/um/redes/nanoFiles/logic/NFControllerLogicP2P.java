@@ -64,7 +64,6 @@ public class NFControllerLogicP2P {
 	                }
 	            });
 
-	            serverThread.setDaemon(true); // Configurar el hilo como daemon (opcional, si quieres que el servidor se cierre cuando el programa principal se cierre)
 	            serverThread.start(); // Iniciar el hilo del servidor
 
 	            // Verificar que el servidor está escuchando en un puerto válido

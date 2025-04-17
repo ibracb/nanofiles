@@ -256,14 +256,18 @@ public class NFDirectoryServer {
 			InetSocketAddress address=dirpkt.getServerSocketAddress();
 			FileInfo [] files= dirpkt.getFileList();
 			if(registeredServers.containsKey(address)&&registeredServers.get(address).equals(files)){
-				
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
 				}
 				
 			else {
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
-				registeredServers.put(address, files);
-				publishedFiles.put(address,files);
+				if (files != null) {
+					registeredServers.put(address, files);
+					publishedFiles.put(address, files);
+					msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
+				} else {
+					System.out.println("Registro recibido sin lista de archivos. Ignorando.");
+					msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
+				}
 			}
 			System.out.println(msgToSend.toString());
 			break;
@@ -272,7 +276,7 @@ public class NFDirectoryServer {
 		
 		case DirMessageOps.OPERATION_FILELIST: {
 			StringBuilder fileListBuilder = new StringBuilder();
-			if (publishedFiles.isEmpty()) {
+			if (publishedFiles.isEmpty() || publishedFiles.values()==null) {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_DENIED);
 			} else {
 				for (FileInfo[] fileArray : publishedFiles.values()) {

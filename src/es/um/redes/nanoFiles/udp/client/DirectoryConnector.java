@@ -320,24 +320,11 @@ public class DirectoryConnector {
 	    DirMessage responseMessage = DirMessage.fromString(messageResponse);
 
 	    if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_OK) && messageResponse.length() > 0) {
-	        if (responseMessage.getFiles() == null) {
+	        if (responseMessage.getFileList() == null) {
 	            System.err.println("File attributes are missing in the response.");
 	            return new FileInfo[0];
 	        }
-
-	        String[] files = responseMessage.getFiles().split(";");
-	        FileInfo[] filelist = new FileInfo[files.length];
-
-	        for (int i = 0; i < files.length; i++) {
-	            String[] fileParts = files[i].split(",");
-	            if (fileParts.length == 4) {
-	                filelist[i] = new FileInfo(fileParts[1], fileParts[0], Long.parseLong(fileParts[2]), fileParts[3]);
-	            } else {
-	                System.err.println("Invalid file data format: " + files[i]);
-	                filelist[i] = null;  // Assigning null to this entry in case of format error.
-	            }
-	        }
-
+	        FileInfo[] filelist = responseMessage.getFileList();
 	        return filelist;
 	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_EMPTY)) {
 	        System.err.println("Empty list.");

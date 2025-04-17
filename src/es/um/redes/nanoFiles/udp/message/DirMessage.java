@@ -2,6 +2,8 @@ package es.um.redes.nanoFiles.udp.message;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import es.um.redes.nanoFiles.util.FileInfo;
 
@@ -30,6 +32,7 @@ public class DirMessage {
 	 * (formato campo:valor)
 	 */
 	private static final String FIELDNAME_PROTOCOL = "protocol";
+	private static final String FIELDNAME_FILES = "files";
 	private static final String FIELDNAME_FILENAME = "filename";
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
@@ -52,7 +55,7 @@ public class DirMessage {
 	private String fileSize;
 	private String fileHash;
 	private InetSocketAddress serverSocketAddress;
-	private FileInfo[] fileList;
+	private FileInfo[] filesList;
 	private int serverPort;
 	private String files;
 	
@@ -74,7 +77,7 @@ public class DirMessage {
 	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
 		this.operation = operation;
 		this.serverPort = serverPort;
-	    this.fileList = fileList;
+	    this.filesList = fileList;
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash, int serverPort, FileInfo[] fileList) {
 		 this.operation = operation;
@@ -82,7 +85,7 @@ public class DirMessage {
 	     this.fileSize = fileSize;
 	     this.fileHash = fileHash;
 	     this.serverPort = serverPort;
-	     this.fileList = fileList;
+	     this.filesList = fileList;
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash) {
         this.operation = operation;
@@ -109,6 +112,12 @@ public class DirMessage {
 		this.protocolId = protocolIdent;
 	}
 
+	public String getFiles() {
+		return files;
+	}
+	public void setFiles(String files) {
+		this.files = files;
+	}
 	public String getProtocolId() {
 
 		return protocolId;
@@ -171,21 +180,14 @@ public class DirMessage {
 	}
 
 	public void setFileList(FileInfo[] files) {
-	    this.fileList = files;
+	    this.filesList = files;
 	}
 
 	public FileInfo[] getFileList() {
-	    return fileList;
+	    return filesList;
 	}
 	
-	public String getFiles() {
-		return files;
-	}
 	
-	public void setFiles(String files) {
-		assert (operation.equals(DirMessageOps.OPERATION_FILELIST_OK));
-		this.files = files;
-	}
 	
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -208,6 +210,9 @@ public class DirMessage {
 		String[] lines = message.split(END_LINE + "");
 		// Local variables to save data during parsing
 		DirMessage m = null;
+		FileInfo currentFile = new FileInfo();
+		List<FileInfo> f = new ArrayList<>();
+		
 
 		for (String line : lines) {
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
@@ -229,16 +234,24 @@ public class DirMessage {
 					m.setPort(aux);
 					break;
 				}
+				case FIELDNAME_FILES:{
+					break;
+				}
 				case FIELDNAME_FILENAME: {
+					currentFile.setFileName(value);
 					m.setFileName(value);
 					break;
 				}
 				case FIELDNAME_FILESIZE: {
+					currentFile.setFileSize(Long.parseLong(value));
 					m.setFileSize(value);
 					break;
 				}
 				case FIELDNAME_FILEHASH: {
+					currentFile.setFileHash(value);
 					m.setFileHash(value);
+					f.add(currentFile);
+					currentFile = new FileInfo();
 					break;
 				}
 				case FIELDNAME_ADRESS: {
@@ -258,6 +271,7 @@ public class DirMessage {
 					System.exit(-1);
 			}
 		}
+		m.setFileList(f.toArray(new FileInfo[0]));
 		return m;
 	}
 
@@ -288,15 +302,24 @@ public class DirMessage {
 			sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(fileHash).append(END_LINE);
 		case DirMessageOps.OPERATION_REGISTER:
 			sb.append(FIELDNAME_SERVERPORT).append(DELIMITER).append(serverPort).append(END_LINE);
-		    for (FileInfo file : fileList) {
+		    for (FileInfo file : filesList) {
 		        sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
 		        sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
 		        sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
 		    }
 		    break;
 		case DirMessageOps.OPERATION_FILELIST:
-				
-			    break;
+			 if (getFileList() != null && getFileList().length != 0) {
+		            for (FileInfo file : getFileList()) {  // Recorrer los archivos en fileList
+		                sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
+		                sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
+		                sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
+		            }
+		        } else {
+		            // Si no hay archivos disponibles, podrías querer enviar un mensaje especial, como OPERATION_FILELIST_EMPTY
+		            sb.append(FIELDNAME_FILES).append(DELIMITER).append("No files available").append(END_LINE);
+		        }
+			break;
 		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();
