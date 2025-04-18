@@ -290,6 +290,9 @@ public class NFDirectoryServer {
 		    System.out.println(msgToSend.toString());
 		    break;
 		}
+		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:{
+			
+		}
 		
 		default:
 			System.err.println("Unexpected message operation: \"" + operation + "\"");

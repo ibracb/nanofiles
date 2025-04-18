@@ -263,7 +263,8 @@ public class DirMessage {
 					String[] parts = value.split(":");
 					String host = parts[0];
 					int port = Integer.parseInt(parts[1]);
-					InetSocketAddress address = new InetSocketAddress(host, port);
+					InetSocketAddress address = new InetSocketAddress(host,port);
+					
 					m.addServerSocketAddress(address);
 					break;
 				}
