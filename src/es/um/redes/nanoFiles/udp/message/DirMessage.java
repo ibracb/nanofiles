@@ -32,7 +32,6 @@ public class DirMessage {
 	 * (formato campo:valor)
 	 */
 	private static final String FIELDNAME_PROTOCOL = "protocol";
-	private static final String FIELDNAME_FILES = "files";
 	private static final String FIELDNAME_FILENAME = "filename";
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
@@ -55,7 +54,7 @@ public class DirMessage {
 	private String fileSize;
 	private String fileHash;
 	private InetSocketAddress serverSocketAddress;
-	private FileInfo[] filesList;
+	private FileInfo[] fileList;
 	private int serverPort;
 	private String files;
 	
@@ -77,7 +76,7 @@ public class DirMessage {
 	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
 		this.operation = operation;
 		this.serverPort = serverPort;
-	    this.filesList = fileList;
+	    this.fileList = fileList;
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash, int serverPort, FileInfo[] fileList) {
 		 this.operation = operation;
@@ -85,7 +84,7 @@ public class DirMessage {
 	     this.fileSize = fileSize;
 	     this.fileHash = fileHash;
 	     this.serverPort = serverPort;
-	     this.filesList = fileList;
+	     this.fileList = fileList;
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash) {
         this.operation = operation;
@@ -112,12 +111,6 @@ public class DirMessage {
 		this.protocolId = protocolIdent;
 	}
 
-	public String getFiles() {
-		return files;
-	}
-	public void setFiles(String files) {
-		this.files = files;
-	}
 	public String getProtocolId() {
 
 		return protocolId;
@@ -180,14 +173,21 @@ public class DirMessage {
 	}
 
 	public void setFileList(FileInfo[] files) {
-	    this.filesList = files;
+	    this.fileList = files;
 	}
 
 	public FileInfo[] getFileList() {
-	    return filesList;
+	    return fileList;
 	}
 	
+	public String getFiles() {
+		return files;
+	}
 	
+	public void setFiles(String files) {
+		assert (operation.equals(DirMessageOps.OPERATION_FILELIST_OK));
+		this.files = files;
+	}
 	
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -232,9 +232,6 @@ public class DirMessage {
 				case FIELDNAME_SERVERPORT:{
 					int aux=Integer.parseInt(value);
 					m.setPort(aux);
-					break;
-				}
-				case FIELDNAME_FILES:{
 					break;
 				}
 				case FIELDNAME_FILENAME: {
@@ -302,24 +299,15 @@ public class DirMessage {
 			sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(fileHash).append(END_LINE);
 		case DirMessageOps.OPERATION_REGISTER:
 			sb.append(FIELDNAME_SERVERPORT).append(DELIMITER).append(serverPort).append(END_LINE);
-		    for (FileInfo file : filesList) {
+		    for (FileInfo file : fileList) {
 		        sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
 		        sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
 		        sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
 		    }
 		    break;
 		case DirMessageOps.OPERATION_FILELIST:
-			 if (getFileList() != null && getFileList().length != 0) {
-		            for (FileInfo file : getFileList()) {  // Recorrer los archivos en fileList
-		                sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
-		                sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
-		                sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
-		            }
-		        } else {
-		            // Si no hay archivos disponibles, podrías querer enviar un mensaje especial, como OPERATION_FILELIST_EMPTY
-		            sb.append(FIELDNAME_FILES).append(DELIMITER).append("No files available").append(END_LINE);
-		        }
-			break;
+				
+			    break;
 		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();

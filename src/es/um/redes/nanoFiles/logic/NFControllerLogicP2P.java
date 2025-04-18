@@ -56,14 +56,8 @@ public class NFControllerLogicP2P {
 	            fileServer = new NFServer(); // Suponiendo que este constructor inicia el servidor
 
 	            // Arrancar el servidor en un nuevo hilo
-	            Thread serverThread = new Thread(new Runnable() {
-	                @Override
-	                public void run() {
-	                    // Iniciar el servidor en segundo plano
-						fileServer.test();  // Este método debe estar en NFServer para iniciar el servidor en modo "test"
-	                }
-	            });
-
+	            Thread serverThread = new Thread(fileServer);
+	            
 	            serverThread.start(); // Iniciar el hilo del servidor
 
 	            // Verificar que el servidor está escuchando en un puerto válido

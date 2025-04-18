@@ -220,7 +220,7 @@ public class NFController {
 		}
 		case NFCommands.COM_PING:
 		case NFCommands.COM_FILELIST:
-			commandAllowed = (currentState == OFFLINE || currentState == CONNECTED);
+			commandAllowed = (currentState == OFFLINE || currentState == CONNECTED || currentState == SERVING);
 			break;
 		case NFCommands.COM_SERVE:
 			commandAllowed = (currentState == CONNECTED);

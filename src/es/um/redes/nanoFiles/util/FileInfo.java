@@ -128,7 +128,6 @@ public class FileInfo {
 		matchingFiles.toArray(result);
 		return result;
 	}
-	
 
 	public String getFileName() {
 		return fileName;
@@ -142,16 +141,23 @@ public class FileInfo {
 		return fileSize;
 	}
 
-	public void setFileSize(long fileSize) {
-		this.fileSize = fileSize;
-	}
 	public String getFileHash() {
 		return fileHash;
+	}
+	public void setFileSize(long fileSize) {
+		this.fileSize = fileSize;
 	}
 	public void setFileHash(String fileHash) {
 		this.fileHash = fileHash;
 	}
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+	public String getFilePath() {
+		return filePath;
+	}
 	
+
 	
 
 	
