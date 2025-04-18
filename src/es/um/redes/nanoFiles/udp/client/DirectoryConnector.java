@@ -311,40 +311,32 @@ public class DirectoryConnector {
 	    byte[] dataToSend = dirMessage.toString().getBytes();
 	    byte[] receivedData = sendAndReceiveDatagrams(dataToSend);
 
-	    if (receivedData == null) {
+	    if (receivedData == null || receivedData.length == 0) {
 	        System.err.println("No data received from the server.");
-	        return new FileInfo[0];
+	        return new FileInfo[0]; // Devuelve una lista vacía en lugar de null
 	    }
 
-	    String messageResponse = new String(receivedData, 0, receivedData.length);
+	    String messageResponse = new String(receivedData, 0, receivedData.length).trim();
 	    DirMessage responseMessage = DirMessage.fromString(messageResponse);
 
-	    if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_OK) && messageResponse.length() > 0) {
-	        if (responseMessage.getFiles() == null) {
-	            System.err.println("File attributes are missing in the response.");
-	            return new FileInfo[0];
-	        }
-
-	        String[] files = responseMessage.getFiles().split(";");
-	        FileInfo[] filelist = new FileInfo[files.length];
-
-	        for (int i = 0; i < files.length; i++) {
-	            String[] fileParts = files[i].split(",");
-	            if (fileParts.length == 4) {
-	                filelist[i] = new FileInfo(fileParts[1], fileParts[0], Long.parseLong(fileParts[2]), fileParts[3]);
-	            } else {
-	                System.err.println("Invalid file data format: " + files[i]);
-	                filelist[i] = null;  // Assigning null to this entry in case of format error.
-	            }
-	        }
-
-	        return filelist;
-	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_EMPTY)) {
-	        System.err.println("Empty list.");
+	    if (responseMessage == null) {
+	        System.err.println("Failed to parse the response message.");
 	        return new FileInfo[0];
 	    }
 
-	    System.err.println("Invalid operation response: " + responseMessage.getOperation());
+	    if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_OK)) {
+	        FileInfo[] fileList = responseMessage.getFileList();
+	        if (fileList == null || fileList.length == 0) {
+	            System.err.println("No files found in the directory.");
+	            return new FileInfo[0];
+	        }
+	        return fileList;
+	    } else if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_FILELIST_EMPTY)) {
+	        System.err.println("The directory returned an empty file list.");
+	        return new FileInfo[0];
+	    }
+
+	    System.err.println("Unexpected operation response: " + responseMessage.getOperation());
 	    return new FileInfo[0];
 	}
 

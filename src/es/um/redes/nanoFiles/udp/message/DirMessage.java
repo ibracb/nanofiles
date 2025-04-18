@@ -57,6 +57,7 @@ public class DirMessage {
 	private FileInfo[] fileList;
 	private int serverPort;
 	private String files;
+	private List<InetSocketAddress> addressList;
 	
 	
 	
@@ -65,15 +66,22 @@ public class DirMessage {
 	 * construir mensajes de diferentes tipos con sus correspondientes argumentos
 	 * (campos del mensaje)
 	 */
+	public DirMessage() {
+		this.addressList=new ArrayList<>();
+		this.fileList=new FileInfo[0];
+	}
 	public DirMessage(String operation) {
+		super();
 		this.operation = operation;
 	}
 	
 	public DirMessage(String operation, String protocolId) {
+		super();
 		this.operation = operation;
 		this.protocolId = protocolId;
 	}
 	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
+		this.addressList=new ArrayList<>();
 		this.operation = operation;
 		this.serverPort = serverPort;
 	    this.fileList = fileList;
@@ -85,8 +93,11 @@ public class DirMessage {
 	     this.fileHash = fileHash;
 	     this.serverPort = serverPort;
 	     this.fileList = fileList;
+	     this.addressList=new ArrayList<>();
+
 	}
 	public DirMessage(String operation, String fileName, String fileSize, String fileHash) {
+		super();
         this.operation = operation;
         this.fileName = fileName;
         this.fileSize = fileSize;
@@ -172,8 +183,8 @@ public class DirMessage {
 	    return serverPort;
 	}
 
-	public void setFileList(FileInfo[] files) {
-	    this.fileList = files;
+	public void setFileList(FileInfo[] fileList) {
+	    this.fileList = fileList;
 	}
 
 	public FileInfo[] getFileList() {
@@ -187,6 +198,9 @@ public class DirMessage {
 	public void setFiles(String files) {
 		assert (operation.equals(DirMessageOps.OPERATION_FILELIST_OK));
 		this.files = files;
+	}
+	public void setAddressList(List<InetSocketAddress> addressList) {
+		this.addressList = addressList;
 	}
 	
 	/**
@@ -306,11 +320,20 @@ public class DirMessage {
 		    }
 		    break;
 		case DirMessageOps.OPERATION_FILELIST:
-				
-			    break;
+			if(fileList!=null) {
+				for (FileInfo file : fileList) {
+			        sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
+			        sb.append(FIELDNAME_FILESIZE).append(DELIMITER).append(file.getFileSize()).append(END_LINE);
+			        sb.append(FIELDNAME_FILEHASH).append(DELIMITER).append(file.getFileHash()).append(END_LINE);
+			    }
+			}
+			
+			break;
 		}
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();
 	}
+
+	
 
 }

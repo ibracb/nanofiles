@@ -5,7 +5,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -270,26 +273,27 @@ public class NFDirectoryServer {
 		
 		
 		case DirMessageOps.OPERATION_FILELIST: {
-			StringBuilder fileListBuilder = new StringBuilder();
 			if (publishedFiles.isEmpty()) {
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_DENIED);
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_EMPTY);
 			} else {
-				for (FileInfo[] fileArray : publishedFiles.values()) {
-					for (FileInfo file : fileArray) {
-						fileListBuilder.append(file.fileName).append(",").append(file.fileHash).append(",")
-								.append(file.fileSize).append(",").append(file.filePath).append(";");
+				List<FileInfo> allFiles = new ArrayList<>();
+				List<InetSocketAddress> allAddress = new ArrayList<>();
+				for (Map.Entry<InetSocketAddress,FileInfo[]> entry : publishedFiles.entrySet()) {
+					InetSocketAddress address = entry.getKey();
+                    FileInfo[] fileArray = entry.getValue();
+					if(fileArray!=null) {
+						allFiles.addAll(Arrays.asList(fileArray));
+						allAddress.add(address);
 					}
 				}
 				
-				if (fileListBuilder.length() > 0) {
-					fileListBuilder.setLength(fileListBuilder.length() - 1);
-				}
-
+				
+				FileInfo[] fileList = allFiles.toArray(new FileInfo[0]);
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_OK);
-
-				msgToSend.setFiles(fileListBuilder.toString());
-				System.out.println("Response: " + msgToSend.toString());
+		        msgToSend.setFileList(fileList);
+		        msgToSend.setAddressList(allAddress);
 			}
+			System.out.println(msgToSend.toString());
 			break;
 		}
 		
