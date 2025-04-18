@@ -70,6 +70,7 @@ public class NFDirectoryServer {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	public DatagramPacket receiveDatagram() throws IOException {
 		DatagramPacket datagramReceivedFromClient = null;

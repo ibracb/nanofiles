@@ -353,11 +353,24 @@ public class DirectoryConnector {
 	public InetSocketAddress[] getServersSharingThisFile(String filenameSubstring) {
 		// TODO: Ver TODOs en pingDirectory y seguir esquema similar
 		InetSocketAddress[] serversList = new InetSocketAddress[0];
-		
+		DirMessage dirMessage = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE);
+		dirMessage.setFileName(filenameSubstring);
 
+		byte[] requestData = dirMessage.toString().getBytes();
+		byte[] responseData = sendAndReceiveDatagrams(requestData);
 
+		if (responseData == null || responseData.length == 0) {
+			System.err.println("* No response from directory.");
+			return new InetSocketAddress[0];
+		}
 
-		return serversList;
+		DirMessage responseMessage = DirMessage.fromString(new String(responseData).trim());
+		if (responseMessage.getOperation().equals(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK)) {
+			return responseMessage.getServerSocketAddresses().toArray(new InetSocketAddress[0]);
+		} else {
+			System.err.println("* Directory could not find servers for file: " + filenameSubstring);
+			return new InetSocketAddress[0];
+		}
 	}
 
 	/**

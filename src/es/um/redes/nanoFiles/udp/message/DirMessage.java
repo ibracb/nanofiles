@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import es.um.redes.nanoFiles.util.FileInfo;
@@ -54,7 +55,7 @@ public class DirMessage {
 	private String fileName;
 	private String fileSize;
 	private String fileHash;
-	private InetSocketAddress serverSocketAddress;
+	private List<InetSocketAddress> serverSocketAddresses;
 	private FileInfo[] fileList;
 	private int serverPort;
 	private String files;
@@ -157,16 +158,11 @@ public class DirMessage {
 		this.fileHash = fileHash;
 	}
 
-	public InetSocketAddress getServerSocketAddress() {
-		return serverSocketAddress;
+	public List<InetSocketAddress> getServerSocketAddresses() {
+		return serverSocketAddresses;
 	}
-
-	public void setServerSocketAddress(InetSocketAddress serverSocketAddress) {
-		/*if(!operation.equals(DirMessageOps)) {
-			throw new RuntimeException(
-					"DirMessage: setServerSocketAddresses called for message of unexpected type (" + operation + ")");
-		}*/
-		this.serverSocketAddress = serverSocketAddress;
+	public void addServerSocketAddress(InetSocketAddress serverSocketAddress) {
+		this.serverSocketAddresses.add(serverSocketAddress);
 	}
 
 	public void setPort(int port) {
@@ -264,13 +260,11 @@ public class DirMessage {
 					break;
 				}
 				case FIELDNAME_ADRESS: {
-					assert(m!=null);
 					String[] parts = value.split(":");
 					String host = parts[0];
 					int port = Integer.parseInt(parts[1]);
-
 					InetSocketAddress address = new InetSocketAddress(host, port);
-					m.setServerSocketAddress(address);
+					m.addServerSocketAddress(address);
 					break;
 				}
 				
@@ -327,7 +321,14 @@ public class DirMessage {
 			}
 			
 			break;
+		
+		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK:
+			for(InetSocketAddress address : serverSocketAddresses) {
+				sb.append(FIELDNAME_ADRESS).append(DELIMITER).append(address).append(END_LINE);
+			}
+			break;
 		}
+			
 		sb.append(END_LINE); // Marcamos el final del mensaje
 		return sb.toString();
 	}
