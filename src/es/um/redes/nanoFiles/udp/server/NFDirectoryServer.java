@@ -256,7 +256,7 @@ public class NFDirectoryServer {
 			break;
 		}
 		case DirMessageOps.OPERATION_REGISTER:{
-			InetSocketAddress address=dirpkt.getServerSocketAddress();
+			InetSocketAddress address=(InetSocketAddress)pkt.getSocketAddress();
 			FileInfo [] files= dirpkt.getFileList();
 			if(files==null || files.length==0){
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
@@ -273,28 +273,21 @@ public class NFDirectoryServer {
 		
 		
 		case DirMessageOps.OPERATION_FILELIST: {
-			if (publishedFiles.isEmpty()) {
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_EMPTY);
-			} else {
-				List<FileInfo> allFiles = new ArrayList<>();
-				List<InetSocketAddress> allAddress = new ArrayList<>();
-				for (Map.Entry<InetSocketAddress,FileInfo[]> entry : publishedFiles.entrySet()) {
-					InetSocketAddress address = entry.getKey();
-                    FileInfo[] fileArray = entry.getValue();
-					if(fileArray!=null) {
-						allFiles.addAll(Arrays.asList(fileArray));
-						allAddress.add(address);
-					}
-				}
-				
-				
-				FileInfo[] fileList = allFiles.toArray(new FileInfo[0]);
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_OK);
+		    if (publishedFiles.isEmpty()) {
+		        msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_EMPTY);
+		    } else {
+		        List<FileInfo> allFiles = new ArrayList<>();
+		        for (FileInfo[] fileArray : publishedFiles.values()) {
+		            if (fileArray != null) {
+		                allFiles.addAll(Arrays.asList(fileArray)); // Agregar todos los archivos
+		            }
+		        }
+		        FileInfo[] fileList = allFiles.toArray(new FileInfo[0]);
+		        msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_OK);
 		        msgToSend.setFileList(fileList);
-		        msgToSend.setAddressList(allAddress);
-			}
-			System.out.println(msgToSend.toString());
-			break;
+		    }
+		    System.out.println(msgToSend.toString());
+		    break;
 		}
 		
 		default:

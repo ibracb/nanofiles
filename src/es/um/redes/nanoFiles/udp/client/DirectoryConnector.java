@@ -313,7 +313,7 @@ public class DirectoryConnector {
 
 	    if (receivedData == null || receivedData.length == 0) {
 	        System.err.println("No data received from the server.");
-	        return new FileInfo[0]; // Devuelve una lista vacía en lugar de null
+	        return new FileInfo[0];
 	    }
 
 	    String messageResponse = new String(receivedData, 0, receivedData.length).trim();
@@ -339,7 +339,6 @@ public class DirectoryConnector {
 	    System.err.println("Unexpected operation response: " + responseMessage.getOperation());
 	    return new FileInfo[0];
 	}
-
 
 	/**
 	 * Método para obtener la lista de servidores que tienen un fichero cuyo nombre
