@@ -16,7 +16,10 @@ public class PeerMessageOps {
 	public static final byte OPCODE_SEND_CHUNK = 0x03;//enviar chunk
 	public static final byte OPCODE_UPLOAD_FILE = 0x04;//petición de subida de archivo
 	public static final byte OPCODE_UPLOAD_ACK = 0x05; //confirmación
-
+	public static final byte OPCODE_FILE_INFO_REQUEST = 0x06;//Cliente pide metadatos del archivo
+	public static final byte OPCODE_FILE_INFO_RESPONSE = 0x07;//Servidor responde con esa info 
+	public static final byte OPCODE_DOWNLOAD_COMPLETE = 0x08;//Cliente indica que ya recibió todo.
+	public static final byte OPCODE_ERROR_MESSAGE = 0x09;//Para errores como archivo corrupto.
 	
 
 	/*
@@ -29,7 +32,11 @@ public class PeerMessageOps {
 		    OPCODE_GET_CHUNK, 
 		    OPCODE_SEND_CHUNK, 
 		    OPCODE_UPLOAD_FILE, 
-		    OPCODE_UPLOAD_ACK 
+		    OPCODE_UPLOAD_ACK,
+		    OPCODE_FILE_INFO_REQUEST,
+		    OPCODE_FILE_INFO_RESPONSE,
+		    OPCODE_DOWNLOAD_COMPLETE,
+		    OPCODE_ERROR_MESSAGE
 
 
 	};
@@ -38,7 +45,11 @@ public class PeerMessageOps {
 		    "GET_CHUNK", 
 		    "SEND_CHUNK", 
 		    "UPLOAD_FILE", 
-		    "UPLOAD_ACK" 
+		    "UPLOAD_ACK",
+		    "FILE_INFO_REQUEST",
+		    "FILE_INFO_RESPONSE",
+		    "DOWNLOAD_COMPLETE",
+		    "ERROR_MESSAGE"
 
 
 	};

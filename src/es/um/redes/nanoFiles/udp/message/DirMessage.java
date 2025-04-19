@@ -269,7 +269,6 @@ public class DirMessage {
 					String host = parts[0];
 					int port = Integer.parseInt(parts[1]);
 					InetSocketAddress address = new InetSocketAddress(host,port);
-					
 					m.addServerSocketAddress(address);
 					break;
 				}
@@ -328,9 +327,7 @@ public class DirMessage {
 			
 			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:
-			for (FileInfo file : fileList) {
-			     sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
-			}
+			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);
 			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK:
 			for(InetSocketAddress address : serverSocketAddresses) {

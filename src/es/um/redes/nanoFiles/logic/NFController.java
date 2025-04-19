@@ -161,8 +161,12 @@ public class NFController {
 			} else {
 				InetSocketAddress[] serverAddressList = controllerDir
 						.getServerAddressesSharingThisFile(targetFilenameSubstring);
-				commandSucceeded = controllerPeer.downloadFileFromServers(serverAddressList, targetFilenameSubstring,
-						downloadLocalFileName);
+				if (serverAddressList != null && serverAddressList.length > 0) {
+					commandSucceeded = controllerPeer.downloadFileFromServers(serverAddressList, targetFilenameSubstring,
+							downloadLocalFileName);
+				} else {
+					System.err.println("* No servers found sharing the requested file.");
+				}
 			}
 			break;
 		case NFCommands.COM_QUIT:

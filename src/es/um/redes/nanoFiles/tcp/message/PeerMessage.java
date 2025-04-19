@@ -3,6 +3,7 @@ package es.um.redes.nanoFiles.tcp.message;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class PeerMessage {
 
@@ -19,6 +20,7 @@ public class PeerMessage {
 	private byte[] chunkData; 
 	private String fileName; 
 	private int fileSize;
+	private String fileHash;
 	
 
 
@@ -50,11 +52,21 @@ public class PeerMessage {
 	}
 	
 	public PeerMessage(byte op, String fileName) {
-	    if (op != PeerMessageOps.OPCODE_UPLOAD_FILE) {
-	        throw new IllegalArgumentException("Opcode incorrecto para UPLOAD_FILE");
+	    if (op != PeerMessageOps.OPCODE_FILE_INFO_REQUEST && op != PeerMessageOps.OPCODE_UPLOAD_FILE) {
+	        throw new IllegalArgumentException("Opcode incorrecto para FILE_INFO_REQUEST/UPLOAD_FILE");
 	    }
 	    this.opcode = op;
 	    this.fileName = fileName;
+	}
+	
+	public PeerMessage(byte op, String fileName, int fileSize, String fileHash) {
+	    if (op != PeerMessageOps.OPCODE_FILE_INFO_RESPONSE) {
+	        throw new IllegalArgumentException("Opcode incorrecto para FILE_INFO_RESPONSE");
+	    }
+	    this.opcode = op;
+	    this.fileName = fileName;
+	    this.fileSize = fileSize;
+	    this.fileHash = fileHash;
 	}
 
 	/*
@@ -133,6 +145,12 @@ public class PeerMessage {
 	public void setFileSize(int fileSize) {
 		this.fileSize = fileSize;
 	}
+	public String getFileHash() {
+	    if (opcode != PeerMessageOps.OPCODE_FILE_INFO_RESPONSE) {
+	        throw new IllegalStateException("Este mensaje no contiene fileHash");
+	    }
+	    return fileHash;
+	}
 
 
 	/**
@@ -159,6 +177,24 @@ public class PeerMessage {
 		
 		case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
             return new PeerMessage(opcode);
+		case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
+		    int nameLen = dis.readShort();
+		    byte[] nameBytes = new byte[nameLen];
+		    dis.readFully(nameBytes);
+		    String requestedName = new String(nameBytes, StandardCharsets.UTF_8);
+		    return new PeerMessage(opcode, requestedName);
+            
+		case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE:
+		    nameLen = dis.readShort();
+		    nameBytes = new byte[nameLen];
+		    dis.readFully(nameBytes);
+		    String fileName = new String(nameBytes, StandardCharsets.UTF_8);
+		    int fileSize = dis.readInt();
+		    int hashLen = dis.readShort();
+		    byte[] hashBytes = new byte[hashLen];
+		    dis.readFully(hashBytes);
+		    String fileHash = new String(hashBytes, StandardCharsets.UTF_8);
+		    return new PeerMessage(opcode, fileName, fileSize, fileHash);
 
         case PeerMessageOps.OPCODE_GET_CHUNK:
             long fileOffset = dis.readLong();
@@ -176,7 +212,7 @@ public class PeerMessage {
             int fileNameLength = dis.readShort();
             byte[] fileNameBytes = new byte[fileNameLength];
             dis.readFully(fileNameBytes);
-            String fileName = new String(fileNameBytes, "UTF-8");
+            fileName = new String(fileNameBytes, "UTF-8");
             return new PeerMessage(opcode, fileName);
 
         case PeerMessageOps.OPCODE_UPLOAD_ACK:
@@ -201,7 +237,20 @@ public class PeerMessage {
 
 		dos.writeByte(opcode);
 		switch (opcode) {
-		
+		case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
+		    byte[] nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+		    dos.writeShort(nameBytes.length);
+		    dos.write(nameBytes);
+		    break;
+		case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE:
+		    nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+		    byte[] hashBytes = fileHash.getBytes(StandardCharsets.UTF_8);
+		    dos.writeShort(nameBytes.length);
+		    dos.write(nameBytes);
+		    dos.writeInt(fileSize);
+		    dos.writeShort(hashBytes.length);
+		    dos.write(hashBytes);
+		    break;
 		case PeerMessageOps.OPCODE_GET_CHUNK:
             dos.writeLong(fileOffset);
             dos.writeInt(chunkSize);
