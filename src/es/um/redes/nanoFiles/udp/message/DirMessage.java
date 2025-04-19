@@ -1,11 +1,10 @@
 package es.um.redes.nanoFiles.udp.message;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import es.um.redes.nanoFiles.util.FileInfo;
 
@@ -78,6 +77,7 @@ public class DirMessage {
 		this.fileList = new FileInfo[0];
 
 	}
+	
 	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
 		this.operation = operation;
 		this.serverPort = serverPort;
@@ -98,6 +98,11 @@ public class DirMessage {
         this.fileHash = fileHash;
 		this.fileList = new FileInfo[0];
     }
+	
+	public DirMessage(String operation, Set<InetSocketAddress> servers) {
+	    this.operation = operation;
+	    this.serverSocketAddresses = new ArrayList<>(servers);
+	}
 	
 	public String getOperation() {
 		return operation;
@@ -322,7 +327,11 @@ public class DirMessage {
 			}
 			
 			break;
-		
+		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:
+			for (FileInfo file : fileList) {
+			     sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(file.getFileName()).append(END_LINE);
+			}
+			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK:
 			for(InetSocketAddress address : serverSocketAddresses) {
 				sb.append(FIELDNAME_ADRESS).append(DELIMITER).append(address).append(END_LINE);

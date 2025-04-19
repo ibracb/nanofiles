@@ -21,6 +21,6 @@ public class DirMessageOps {
 	public static final String OPERATION_DOWNLOAD = "download";
 	public static final String OPERATION_SERVERS_SHARING_FILE = "servers_sharing_file";
 	public static final String OPERATION_SERVERS_SHARING_FILE_OK = "servers_sharing_file_ok";
-	public static final String OPERATION_SERVERS_SHARING_FILE_DENIED = "servers_sharing_file_denied";
+	public static final String OPERATION_SERVERS_SHARING_FILE_EMPTY = "servers_sharing_file_empty";
 	
 }

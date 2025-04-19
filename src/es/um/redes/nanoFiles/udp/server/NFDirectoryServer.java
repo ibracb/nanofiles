@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.udp.message.DirMessage;
@@ -291,7 +292,23 @@ public class NFDirectoryServer {
 		    break;
 		}
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:{
-			
+			String fileSubstring = dirpkt.getFileName();
+			if (registeredServers.isEmpty()) {
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
+			} else {
+				Set<InetSocketAddress> servers = registeredServers.entrySet().stream()
+					.filter(entry -> Arrays.stream(entry.getValue())
+						.anyMatch(file -> file.getFileName().contains(fileSubstring)))
+					.map(Map.Entry::getKey)
+					.collect(Collectors.toSet());
+				if (servers.isEmpty()) {
+					msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
+				} else {
+					msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK, servers);
+				}
+			}
+			System.out.println(msgToSend.toString());
+			break;
 		}
 		
 		default:
