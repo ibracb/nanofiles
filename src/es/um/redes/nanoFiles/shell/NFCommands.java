@@ -98,5 +98,5 @@ public class NFCommands {
 					+ _valid_user_commands_help[i]);
 		}		
 	}
-}	
+}
 

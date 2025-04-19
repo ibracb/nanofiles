@@ -222,6 +222,7 @@ public class DirMessage {
 		DirMessage m = null;
 		FileInfo currentFile = null; // Inicializa como null
 		List<FileInfo> f = new ArrayList<>();
+		List<InetSocketAddress> serverAddresses = new ArrayList<>();
 
 		for (String line : lines) {
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
@@ -265,11 +266,20 @@ public class DirMessage {
 					break;
 				}
 				case FIELDNAME_ADRESS: {
+					// Corregir el parsing de direcciones
 					String[] parts = value.split(":");
-					String host = parts[0];
-					int port = Integer.parseInt(parts[1]);
-					InetSocketAddress address = new InetSocketAddress(host,port);
-					m.addServerSocketAddress(address);
+					if (parts.length == 2) {
+						String host = parts[0];
+						try {
+							int port = Integer.parseInt(parts[1]);
+							InetSocketAddress address = new InetSocketAddress(host, port);
+							serverAddresses.add(address);
+						} catch (NumberFormatException e) {
+							System.err.println("Invalid port format in address: " + value);
+						}
+					} else {
+						System.err.println("Invalid address format: " + value);
+					}
 					break;
 				}
 				
@@ -281,6 +291,9 @@ public class DirMessage {
 		}
 		
 		m.setFileList(f.toArray(new FileInfo[0])); // Establece la lista de archivos
+		if (m != null) {
+			m.serverSocketAddresses = serverAddresses;
+		}
 		return m;
 	}
 

@@ -351,6 +351,11 @@ public class DirectoryConnector {
 	 *         una lista vacía.
 	 */
 	public InetSocketAddress[] getServersSharingThisFile(String filenameSubstring) {
+		if (filenameSubstring == null || filenameSubstring.isEmpty()) {
+			System.err.println("* Invalid filename substring provided.");
+			return new InetSocketAddress[0];
+		}
+
 		DirMessage dirMessage = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE);
 		dirMessage.setFileName(filenameSubstring);
 		byte[] requestData = dirMessage.toString().getBytes();

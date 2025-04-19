@@ -291,8 +291,15 @@ public class NFDirectoryServer {
 		    System.out.println(msgToSend.toString());
 		    break;
 		}
-		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:{
+		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE: {
 			String fileSubstring = dirpkt.getFileName();
+			if (fileSubstring == null || fileSubstring.isEmpty()) {
+				// Responder con un mensaje de error si el campo filename es inválido
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
+				System.err.println("Invalid filename received in servers_sharing_file operation.");
+				break;
+			}
+
 			if (registeredServers.isEmpty()) {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
 			} else {
