@@ -64,64 +64,76 @@ public class NFConnector {
 	}
 
 	public boolean downloadFile(String targetFileNameSubstring, String localFileName) throws IOException {
-	    boolean downloaded = false;
-	    String expectedHash = null;
+		boolean downloaded = false;
+		String expectedHash = null;
 
-	    try {
-	        // Request file information based on the substring
-	        PeerMessage request = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_REQUEST, targetFileNameSubstring);
-	        request.writeMessageToOutputStream(dos);
-	        PeerMessage response = PeerMessage.readMessageFromInputStream(dis);
-	        if (response.getOpcode() == PeerMessageOps.OPCODE_FILE_NOT_FOUND) {
-	            System.err.println("No file matches the provided substring: " + targetFileNameSubstring);
-	            return false;
-	        }
+		try {
+			// Request file information based on the substring
+			PeerMessage request = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_REQUEST, targetFileNameSubstring);
+			request.writeMessageToOutputStream(dos);
+			PeerMessage response = PeerMessage.readMessageFromInputStream(dis);
 
-	        if (response.getOpcode() != PeerMessageOps.OPCODE_FILE_INFO_RESPONSE) {
-	            System.err.println("Unexpected response from server.");
-	            return false;
-	        }
+			if (response.getOpcode() == PeerMessageOps.OPCODE_FILE_NOT_FOUND) {
+				System.err.println("No file matches the provided substring: " + targetFileNameSubstring);
+				return false;
+			}
 
-	        int fileSize = response.getFileSize();
-	        expectedHash = response.getFileHash();
-	        System.out.println("Downloading file: " + response.getFileName() + " (Size: " + fileSize + " bytes)");
+			if (response.getOpcode() != PeerMessageOps.OPCODE_FILE_INFO_RESPONSE) {
+				System.err.println("Unexpected response from server.");
+				return false;
+			}
 
-	        try (FileOutputStream fos = new FileOutputStream(localFileName)) {
-	            long offset = 0;
-	            while (!downloaded) {
-	                // Request a chunk from the server
-	                PeerMessage chunkRequest = new PeerMessage(PeerMessageOps.OPCODE_GET_CHUNK, offset, 4096);
-	                chunkRequest.writeMessageToOutputStream(dos);
+			int fileSize = response.getFileSize();
+			expectedHash = response.getFileHash();
+			System.out.println("Downloading file: " + response.getFileName() + " (Size: " + fileSize + " bytes)");
 
-	                PeerMessage chunkResponse = PeerMessage.readMessageFromInputStream(dis);
+			System.out.println("Server at " + serverAddr.getAddress() + ":" + serverAddr.getPort() + " found matching filename with hash: " + expectedHash);
 
-	                if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_SEND_CHUNK) {
-	                    fos.write(chunkResponse.getChunkData());
-	                    offset += chunkResponse.getChunkSize();
-	                } else if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE) {
-	                    downloaded = true;
-	                } else {
-	                    System.err.println("Unexpected response while downloading chunk.");
-	                    return false;
-	                }
-	            }
-	        }
-	        if (downloaded) {
-	            String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
-	            if (!downloadedFileHash.equals(expectedHash)) {
-	                System.err.println("File integrity check failed. Hash mismatch.");
-	                return false;
-	            }
-	            System.out.println("File downloaded successfully: " + localFileName);
-	        }
+			try (FileOutputStream fos = new FileOutputStream(localFileName)) {
+				long offset = 0;
+				int totalChunksDownloaded = 0;
+				int totalBytesDownloaded = 0;
 
-	    } catch (IOException e) {
-	        System.err.println("Error during file download: " + e.getMessage());
-	        return false;
-	    }
+				while (!downloaded) {
+					// Request a chunk from the server
+					PeerMessage chunkRequest = new PeerMessage(PeerMessageOps.OPCODE_GET_CHUNK, offset, 4096);
+					chunkRequest.writeMessageToOutputStream(dos);
+
+					PeerMessage chunkResponse = PeerMessage.readMessageFromInputStream(dis);
+
+					if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_SEND_CHUNK) {
+						fos.write(chunkResponse.getChunkData());
+						offset += chunkResponse.getChunkSize();
+						totalChunksDownloaded++;
+						totalBytesDownloaded += chunkResponse.getChunkSize();
+					} else if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE) {
+						downloaded = true;
+					} else {
+						System.err.println("Unexpected response while downloading chunk.");
+						return false;
+					}
+				}
+				System.out.println("\t" + totalBytesDownloaded + " bytes (" + totalChunksDownloaded + " chunks) from server at " + serverAddr.getAddress() + ":" + serverAddr.getPort());
+			}
+
+			if (downloaded) {
+				String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
+				if (!downloadedFileHash.equals(expectedHash)) {
+					System.err.println("File integrity check failed. Hash mismatch.");
+					return false;
+				}
+				System.out.println("File downloaded successfully: " + localFileName);
+			}
+
+		} catch (IOException e) {
+			System.err.println("Error during file download: " + e.getMessage());
+			return false;
+		}
+
 		socket.close();
-	    return downloaded;
+		return downloaded;
 	}
+
 
 	public void close() throws IOException {
 	    if (socket != null && !socket.isClosed()) {
