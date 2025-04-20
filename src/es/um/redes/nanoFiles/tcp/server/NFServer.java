@@ -14,9 +14,6 @@ import es.um.redes.nanoFiles.tcp.message.PeerMessage;
 import es.um.redes.nanoFiles.tcp.message.PeerMessageOps;
 import es.um.redes.nanoFiles.util.FileDigest;
 
-
-
-
 public class NFServer implements Runnable {
 
 	public static final int PORT = 0;
@@ -29,13 +26,11 @@ public class NFServer implements Runnable {
 		 */
 		serverSocket = new ServerSocket();
 		serverSocket.bind(new InetSocketAddress(PORT));
+		System.out.println("NFServer server is running on: " + serverSocket.getInetAddress() +":"+ serverSocket.getLocalPort());
 		/*
 		 * TODO: (Boletín SocketsTCP) Crear un socket servidor y ligarlo a la dirección
 		 * de socket anterior
 		 */
-
-
-
 	}
 
 	/**
@@ -71,11 +66,8 @@ public class NFServer implements Runnable {
 				serveFilesToClient(clientSocket);
 			}catch(IOException e){
 				System.err.println("Error while accepting client connection: " + e.getMessage());
+				break;
 			}
-			
-
-
-
 		}
 	}
 
@@ -110,6 +102,7 @@ public class NFServer implements Runnable {
                 // Esperar conexiones de clientes
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected: " + clientSocket.getInetAddress());
+                serveFilesToClient(clientSocket);
 
                 // Crear un nuevo hilo para manejar la comunicación con el cliente
                 NFServerThread serverThread = new NFServerThread(clientSocket);
@@ -120,10 +113,6 @@ public class NFServer implements Runnable {
                 break;  // Si ocurre un error, salir del bucle de escucha
             }
         }
-
-
-
-
 	}
 	/*
 	 * TODO: (Boletín SocketsTCP) Añadir métodos a esta clase para: 1) Arrancar el
@@ -145,12 +134,12 @@ public class NFServer implements Runnable {
         }
     }
     
-    //Método para obtener el puerto de escucha del servidor
+    // Método para obtener el puerto asociado al socket del servidor
     public int getPort() {
 		return serverSocket.getLocalPort();
 	}
-
-
+    
+    
 
 	/**
 	 * Método de clase que implementa el extremo del servidor del protocolo de
@@ -160,68 +149,70 @@ public class NFServer implements Runnable {
 	 *               descargar ficheros.
 	 */
 	public static void serveFilesToClient(Socket socket) throws IOException {
-		System.out.println("Serving files to client: " + socket.getInetAddress());
-		DataInputStream dis = new DataInputStream(socket.getInputStream());
-	    DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-	    while (true) {
-	        PeerMessage msg = PeerMessage.readMessageFromInputStream(dis);
+	    System.out.println("Serving files to client: " + socket.getInetAddress());
+	    try (DataInputStream dis = new DataInputStream(socket.getInputStream());
+	         DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
 
-	        switch (msg.getOpcode()) {
+	        while (true) {
+	            PeerMessage msg = PeerMessage.readMessageFromInputStream(dis);
 
-	            case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
-	                String requestedName = msg.getFileName();
+	            switch (msg.getOpcode()) {
+	                case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
+	                    String requestedName = msg.getFileName();
+	                    File file = new File(requestedName);
 
-	                File file = new File(requestedName);  // Nombre completo recibido del cliente
-	                if (!file.exists()) {
-	                    new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
-	                    break;
-	                }
-
-	                int size = (int) file.length();
-	                String hash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
-
-	                PeerMessage response = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_RESPONSE, requestedName, size, hash);
-	                response.writeMessageToOutputStream(dos);
-	                break;
-
-	            case PeerMessageOps.OPCODE_GET_CHUNK:
-	                long offset = msg.getFileOffset();
-	                int chunkSize = msg.getChunkSize();
-
-	                File chunkFile = new File(msg.getFileName()); 
-	                if (!chunkFile.exists()) {
-	                    new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
-	                    break;
-	                }
-
-	                byte[] buffer = new byte[chunkSize];
-	                try (RandomAccessFile raf = new RandomAccessFile(chunkFile, "r")) {
-	                    raf.seek(offset);
-	                    int readBytes = raf.read(buffer);
-
-	                    if (readBytes > 0) {
-	                        byte[] chunkData = Arrays.copyOf(buffer, readBytes);
-	                        PeerMessage chunkMsg = new PeerMessage(PeerMessageOps.OPCODE_SEND_CHUNK, offset, readBytes, chunkData);
-	                        chunkMsg.writeMessageToOutputStream(dos);
-	                    } else {
-	                        PeerMessage emptyChunk = new PeerMessage(PeerMessageOps.OPCODE_SEND_CHUNK, offset, 0, new byte[0]);
-	                        emptyChunk.writeMessageToOutputStream(dos);
+	                    if (!file.exists()) {
+	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
+	                        break;
 	                    }
-	                }
-	                break;
 
-	            default:
-	                System.err.println("Unsupported opcode: " + msg.getOpcode());
-	                break;
+	                    int size = (int) file.length();
+	                    String hash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
+	                    PeerMessage response = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_RESPONSE, requestedName, size, hash);
+	                    response.writeMessageToOutputStream(dos);
+	                    break;
+
+	                case PeerMessageOps.OPCODE_GET_CHUNK:
+	                    long offset = msg.getFileOffset();
+	                    int chunkSize = msg.getChunkSize();
+	                    File chunkFile = new File(msg.getFileName());
+
+	                    if (!chunkFile.exists()) {
+	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
+	                        break;
+	                    }
+
+	                    byte[] buffer = new byte[chunkSize];
+	                    try (RandomAccessFile raf = new RandomAccessFile(chunkFile, "r")) {
+	                        raf.seek(offset);
+	                        int readBytes = raf.read(buffer);
+
+	                        if (readBytes > 0) {
+	                            byte[] chunkData = Arrays.copyOf(buffer, readBytes);
+	                            PeerMessage chunkMsg = new PeerMessage(PeerMessageOps.OPCODE_SEND_CHUNK, offset, readBytes, chunkData);
+	                            chunkMsg.writeMessageToOutputStream(dos);
+	                        } else {
+	                            PeerMessage completeMsg = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE);
+	                            completeMsg.writeMessageToOutputStream(dos);
+	                        }
+	                    }
+	                    break;
+
+	                default:
+	                    System.err.println("Unsupported opcode: " + msg.getOpcode());
+	                    break;
+	            }
+	        }
+	    } catch (IOException e) {
+	        System.err.println("Error while serving client: " + e.getMessage());
+	    } finally {
+	        try {
+	            socket.close();
+	        } catch (IOException e) {
+	            System.err.println("Error while closing client socket: " + e.getMessage());
 	        }
 	    }
 	}
-		
-
-    
-	
-
-
 }
 
 

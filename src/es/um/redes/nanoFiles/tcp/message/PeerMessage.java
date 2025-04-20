@@ -163,7 +163,7 @@ public class PeerMessage {
 	 * @throws IOException
 	 */
 	public static PeerMessage readMessageFromInputStream(DataInputStream dis) throws IOException {
-		/*
+/*
 		 * TODO: (Boletín MensajesBinarios) En función del tipo de mensaje, leer del
 		 * socket a través del "dis" el resto de campos para ir extrayendo con los
 		 * valores y establecer los atributos del un objeto DirMessage que contendrá
@@ -171,110 +171,118 @@ public class PeerMessage {
 		 * Usar dis.readFully para leer un array de bytes, dis.readInt para leer un
 		 * entero, etc.
 		 */
-		PeerMessage message = new PeerMessage();
-		byte opcode = dis.readByte();
-		switch (opcode) {
 		
-		case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
-            return new PeerMessage(opcode);
-		case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
-		    int nameLen = dis.readShort();
-		    byte[] nameBytes = new byte[nameLen];
-		    dis.readFully(nameBytes);
-		    String requestedName = new String(nameBytes, StandardCharsets.UTF_8);
-		    return new PeerMessage(opcode, requestedName);
-            
-		case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE:
-		    nameLen = dis.readShort();
-		    nameBytes = new byte[nameLen];
-		    dis.readFully(nameBytes);
-		    String fileName = new String(nameBytes, StandardCharsets.UTF_8);
-		    int fileSize = dis.readInt();
-		    int hashLen = dis.readShort();
-		    byte[] hashBytes = new byte[hashLen];
-		    dis.readFully(hashBytes);
-		    String fileHash = new String(hashBytes, StandardCharsets.UTF_8);
-		    return new PeerMessage(opcode, fileName, fileSize, fileHash);
+	    byte opcode = dis.readByte();
+	    PeerMessage message = new PeerMessage(opcode);
+	    switch (opcode) {
+	        case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
+	            return new PeerMessage(opcode);
 
-        case PeerMessageOps.OPCODE_GET_CHUNK:
-            long fileOffset = dis.readLong();
-            int chunkSize = dis.readInt();
-            return new PeerMessage(opcode, fileOffset, chunkSize);
+	        case PeerMessageOps.OPCODE_FILE_INFO_REQUEST: {
+	            short nameLen = dis.readShort();
+	            byte[] nameBytes = new byte[nameLen];
+	            dis.readFully(nameBytes);
+	            String requestedName = new String(nameBytes, StandardCharsets.UTF_8);
+	            return new PeerMessage(opcode, requestedName);
+	        }
 
-        case PeerMessageOps.OPCODE_SEND_CHUNK:
-            fileOffset = dis.readLong();
-            chunkSize = dis.readInt();
-            byte[] chunkData = new byte[chunkSize];
-            dis.readFully(chunkData);
-            return new PeerMessage(opcode, fileOffset, chunkSize, chunkData);
+	        case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE: {
+	            short nameLen = dis.readShort();
+	            byte[] nameBytes = new byte[nameLen];
+	            dis.readFully(nameBytes);
+	            String fileName = new String(nameBytes, StandardCharsets.UTF_8);
+	            int fileSize = dis.readInt();
+	            int hashLen = dis.readInt();
+	            byte[] hashBytes = new byte[hashLen];
+	            dis.readFully(hashBytes);
+	            String fileHash = new String(hashBytes, StandardCharsets.UTF_8);
+	            return new PeerMessage(opcode, fileName, fileSize, fileHash);
+	        }
 
-        case PeerMessageOps.OPCODE_UPLOAD_FILE:
-            int fileNameLength = dis.readShort();
-            byte[] fileNameBytes = new byte[fileNameLength];
-            dis.readFully(fileNameBytes);
-            fileName = new String(fileNameBytes, "UTF-8");
-            return new PeerMessage(opcode, fileName);
+	        case PeerMessageOps.OPCODE_GET_CHUNK: {
+	            long fileOffset = dis.readLong();
+	            int chunkSize = dis.readInt();
+	            return new PeerMessage(opcode, fileOffset, chunkSize);
+	        }
 
-        case PeerMessageOps.OPCODE_UPLOAD_ACK:
-            return new PeerMessage(opcode);
+	        case PeerMessageOps.OPCODE_SEND_CHUNK: {
+	            long fileOffset = dis.readLong();
+	            int chunkSize = dis.readInt();
+	            byte[] chunkData = new byte[chunkSize];
+	            dis.readFully(chunkData);
+	            return new PeerMessage(opcode, fileOffset, chunkSize, chunkData);
+	        }
 
-		default:
-			System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
+	        case PeerMessageOps.OPCODE_UPLOAD_FILE: {
+	            short fileNameLength = dis.readShort();
+	            byte[] fileNameBytes = new byte[fileNameLength];
+	            dis.readFully(fileNameBytes);
+	            String fileName = new String(fileNameBytes, StandardCharsets.UTF_8);
+	            return new PeerMessage(opcode, fileName);
+	        }
+
+	        case PeerMessageOps.OPCODE_UPLOAD_ACK:
+	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
+	            return new PeerMessage(opcode);
+
+	        default:
+	            System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
 					+ PeerMessageOps.opcodeToOperation(opcode));
 			System.exit(-1);
-		}
-		return message;
+	    }
+	    return message;
 	}
 
 	public void writeMessageToOutputStream(DataOutputStream dos) throws IOException {
-		/*
-		 * TODO (Boletín MensajesBinarios): Escribir los bytes en los que se codifica el
-		 * mensaje en el socket a través del "dos", teniendo en cuenta opcode del
-		 * mensaje del que se trata y los campos relevantes en cada caso. NOTA: Usar
-		 * dos.write para leer un array de bytes, dos.writeInt para escribir un entero,
-		 * etc.
-		 */
+	    dos.writeByte(opcode);
+	    switch (opcode) {
+	        case PeerMessageOps.OPCODE_FILE_INFO_REQUEST: {
+	            byte[] nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+	            dos.writeShort(nameBytes.length);
+	            dos.write(nameBytes);
+	            break;
+	        }
 
-		dos.writeByte(opcode);
-		switch (opcode) {
-		case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
-		    byte[] nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
-		    dos.writeShort(nameBytes.length);
-		    dos.write(nameBytes);
-		    break;
-		case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE:
-		    nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
-		    byte[] hashBytes = fileHash.getBytes(StandardCharsets.UTF_8);
-		    dos.writeShort(nameBytes.length);
-		    dos.write(nameBytes);
-		    dos.writeInt(fileSize);
-		    dos.writeShort(hashBytes.length);
-		    dos.write(hashBytes);
-		    break;
-		case PeerMessageOps.OPCODE_GET_CHUNK:
-            dos.writeLong(fileOffset);
-            dos.writeInt(chunkSize);
-            break;
+	        case PeerMessageOps.OPCODE_FILE_INFO_RESPONSE: {
+	            byte[] nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+	            byte[] hashBytes = fileHash.getBytes(StandardCharsets.UTF_8);
+	            dos.writeShort(nameBytes.length);
+	            dos.write(nameBytes);
+	            dos.writeInt(fileSize);
+	            dos.writeShort(hashBytes.length);
+	            dos.write(hashBytes);
+	            break;
+	        }
 
-        case PeerMessageOps.OPCODE_SEND_CHUNK:
-            dos.writeLong(fileOffset);
-            dos.writeInt(chunkSize);
-            dos.write(chunkData);
-            break;
+	        case PeerMessageOps.OPCODE_GET_CHUNK: {
+	            dos.writeLong(fileOffset);
+	            dos.writeInt(chunkSize);
+	            break;
+	        }
 
-        case PeerMessageOps.OPCODE_UPLOAD_FILE:
-            byte[] fileNameBytes = fileName.getBytes();
-            dos.writeShort(fileNameBytes.length);
-            dos.write(fileNameBytes);
-            break;
-            
-        case PeerMessageOps.OPCODE_UPLOAD_ACK:
-            break;
-            
-		default:
-			System.err.println("PeerMessage.writeMessageToOutputStream found unexpected message opcode " + opcode + "("
+	        case PeerMessageOps.OPCODE_SEND_CHUNK: {
+	            dos.writeLong(fileOffset);
+	            dos.writeInt(chunkSize);
+	            dos.write(chunkData);
+	            break;
+	        }
+
+	        case PeerMessageOps.OPCODE_UPLOAD_FILE: {
+	            byte[] fileNameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+	            dos.writeShort(fileNameBytes.length);
+	            dos.write(fileNameBytes);
+	            break;
+	        }
+
+	        case PeerMessageOps.OPCODE_UPLOAD_ACK:
+	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
+	            // No additional data to write for these opcodes
+	            break;
+
+	        default:
+	            System.err.println("PeerMessage.writeMessageToOutputStream found unexpected message opcode " + opcode + "("
 					+ PeerMessageOps.opcodeToOperation(opcode) + ")");
-		}
+	    }
 	}
 
 

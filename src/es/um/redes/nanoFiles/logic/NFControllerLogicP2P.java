@@ -64,8 +64,8 @@ public class NFControllerLogicP2P {
 
 	            // Verificar que el servidor está escuchando en un puerto válido
 	            if (fileServer.getPort() > 0) {
-	                System.out.println("File server is running on port: " + fileServer.getPort());
 	                serverRunning = true;
+	                System.out.println("* You are now serving files on port " + fileServer.getPort());
 	            } else {
 	                System.err.println("Error: Server not listening on a valid port.");
 	            }
@@ -175,15 +175,14 @@ public class NFControllerLogicP2P {
 				// Attempt to download the file from each server sequentially
 				for (InetSocketAddress serverAddress : serverAddressList) {
 				    try {
-				        // Validate server address
-				        if (serverAddress == null || serverAddress.getAddress().isAnyLocalAddress() || serverAddress.getPort() <= 0) {
+				        // Validar que la dirección no sea nula y que tenga una IP válida
+				        if (serverAddress == null || serverAddress.getAddress() == null || serverAddress.getPort() <= 0) {
 				            System.err.println("* Invalid server address: " + serverAddress);
 				            continue;
 				        }
 
 				        NFConnector connector = new NFConnector(serverAddress);
 				        try {
-				            System.out.println("Connecting to server: " + serverAddress);
 
 				            // Download the file
 				            if (connector.downloadFile(targetFileNameSubstring, localFileName)) {

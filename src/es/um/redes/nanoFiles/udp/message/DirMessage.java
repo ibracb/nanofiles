@@ -356,7 +356,8 @@ public class DirMessage {
 			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK:
 			for(InetSocketAddress address : serverSocketAddresses) {
-				sb.append(FIELDNAME_ADDRESS).append(DELIMITER).append(address).append(END_LINE);
+				sb.append(FIELDNAME_ADDRESS).append(DELIMITER).append(address.getAddress().getHostAddress())
+					.append(":").append(address.getPort()).append(END_LINE);
 			}
 			break;
 		}

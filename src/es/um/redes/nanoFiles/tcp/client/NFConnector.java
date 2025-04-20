@@ -21,19 +21,23 @@ public class NFConnector {
 
 	public NFConnector(InetSocketAddress fserverAddr) throws UnknownHostException, IOException {
 		serverAddr = fserverAddr;
-		/*
-		 * TODO: (Boletín SocketsTCP) Se crea el socket a partir de la dirección del
-		 * servidor (IP, puerto). La creación exitosa del socket significa que la
-		 * conexión TCP ha sido establecida.
-		 */
-		socket = new Socket(serverAddr.getAddress(), serverAddr.getPort());
-		/*
-		 * TODO: (Boletín SocketsTCP) Se crean los DataInputStream/DataOutputStream a
-		 * partir de los streams de entrada/salida del socket creado. Se usarán para
-		 * enviar (dos) y recibir (dis) datos del servidor.
-		 */
+
+		if (serverAddr == null || serverAddr.getAddress() == null || serverAddr.getPort() <= 0) {
+			System.err.println("* Invalid server address: " + serverAddr);
+			return;
+		}
+
+		try {
+			System.out.println("Attempting to connect to server: " + serverAddr);
+			socket = new Socket(serverAddr.getAddress(), serverAddr.getPort());
+			System.out.println("Connected to server: " + serverAddr);
+		} catch (IOException e) {
+			System.err.println("Error: Unable to establish connection - " + e.getMessage());
+			throw e;
+		}
+
 		dis = new DataInputStream(socket.getInputStream());
-	    dos = new DataOutputStream(socket.getOutputStream());
+		dos = new DataOutputStream(socket.getOutputStream());
 	}
 
 	public void test() {
@@ -67,7 +71,6 @@ public class NFConnector {
 	        // Request file information based on the substring
 	        PeerMessage request = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_REQUEST, targetFileNameSubstring);
 	        request.writeMessageToOutputStream(dos);
-
 	        PeerMessage response = PeerMessage.readMessageFromInputStream(dis);
 	        if (response.getOpcode() == PeerMessageOps.OPCODE_FILE_NOT_FOUND) {
 	            System.err.println("No file matches the provided substring: " + targetFileNameSubstring);

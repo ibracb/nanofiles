@@ -257,20 +257,20 @@ public class NFDirectoryServer {
 
 			break;
 		}
-		case DirMessageOps.OPERATION_REGISTER:{
-			InetSocketAddress address=(InetSocketAddress)pkt.getSocketAddress();
-			FileInfo [] files= dirpkt.getFileList();
-			if(files==null || files.length==0){
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
-			}
-				
-			else {
-				msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
-				registeredServers.put(address, files);
-				publishedFiles.put(address,files);
-			}
-			System.out.println(msgToSend.toString());
-			break;
+		case DirMessageOps.OPERATION_REGISTER: {
+		    InetSocketAddress address = (InetSocketAddress) pkt.getSocketAddress();
+		    int serverPort = dirpkt.getPort(); // Obtén el puerto del mensaje
+		    FileInfo[] files = dirpkt.getFileList();
+		    if (files == null || files.length == 0 || serverPort <= 0) {
+		        msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
+		    } else {
+		        msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
+		        InetSocketAddress serverAddress = new InetSocketAddress(address.getAddress(), serverPort);
+		        registeredServers.put(serverAddress, files);
+		        publishedFiles.put(serverAddress, files);
+		    }
+		    System.out.println(msgToSend.toString());
+		    break;
 		}
 		
 		
