@@ -174,32 +174,38 @@ public class NFControllerLogicP2P {
 
 				// Attempt to download the file from each server sequentially
 				for (InetSocketAddress serverAddress : serverAddressList) {
-					try {
-						NFConnector connector = new NFConnector(serverAddress);
-						try {
-							System.out.println("Connecting to server: " + serverAddress);
+				    try {
+				        // Validate server address
+				        if (serverAddress == null || serverAddress.getAddress().isAnyLocalAddress() || serverAddress.getPort() <= 0) {
+				            System.err.println("* Invalid server address: " + serverAddress);
+				            continue;
+				        }
 
-							// Download the file
-							if (connector.downloadFile(targetFileNameSubstring, localFileName)) {
-								// Verify the hash of the downloaded file
-								String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
-								if (expectedFileHash == null) {
-									expectedFileHash = downloadedFileHash; // Set the expected hash
-								} else if (!expectedFileHash.equals(downloadedFileHash)) {
-									System.err.println("* Hash mismatch! File integrity compromised.");
-									return false;
-								}
+				        NFConnector connector = new NFConnector(serverAddress);
+				        try {
+				            System.out.println("Connecting to server: " + serverAddress);
 
-								System.out.println("* Successfully downloaded file from server: " + serverAddress);
-								downloaded = true;
-								break; // Exit the loop if the download was successful
-							}
-						} finally {
-							connector.close(); // Ensure the connector is properly closed
-						}
-					} catch (IOException e) {
-						System.err.println("* Error connecting to server " + serverAddress + ": " + e.getMessage());
-					}
+				            // Download the file
+				            if (connector.downloadFile(targetFileNameSubstring, localFileName)) {
+				                // Verify the hash of the downloaded file
+				                String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
+				                if (expectedFileHash == null) {
+				                    expectedFileHash = downloadedFileHash; // Set the expected hash
+				                } else if (!expectedFileHash.equals(downloadedFileHash)) {
+				                    System.err.println("* Hash mismatch! File integrity compromised.");
+				                    return false;
+				                }
+
+				                System.out.println("* Successfully downloaded file from server: " + serverAddress);
+				                downloaded = true;
+				                break; // Exit the loop if the download was successful
+				            }
+				        } finally {
+				            connector.close(); // Ensure the connector is properly closed
+				        }
+				    } catch (IOException e) {
+				        System.err.println("* Error connecting to server " + serverAddress + ": " + e.getMessage());
+				    }
 				}
 
 				if (!downloaded) {

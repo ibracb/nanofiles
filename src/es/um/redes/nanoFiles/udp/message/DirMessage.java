@@ -34,9 +34,10 @@ public class DirMessage {
 	 */
 	private static final String FIELDNAME_PROTOCOL = "protocol";
 	private static final String FIELDNAME_FILENAME = "filename";
+	private static final String FIELDNAME_FILENAMESUBSTRING = "filenamesubstring";
 	private static final String FIELDNAME_FILESIZE = "filesize";
 	private static final String FIELDNAME_FILEHASH = "filehash";
-	private static final String FIELDNAME_ADRESS = "adress";
+	private static final String FIELDNAME_ADDRESS = "adress";
 	private static final String FIELDNAME_SERVERPORT = "serverport";
 
 	/**
@@ -54,6 +55,7 @@ public class DirMessage {
 	private String fileName;
 	private String fileSize;
 	private String fileHash;
+	private String fileNameSubstring;
 	private List<InetSocketAddress> serverSocketAddresses;
 	private FileInfo[] fileList;
 	private int serverPort;
@@ -198,6 +200,12 @@ public class DirMessage {
 		assert (operation.equals(DirMessageOps.OPERATION_FILELIST_OK));
 		this.files = files;
 	}
+	public String getFileNameSubstring() {
+		return fileNameSubstring;
+	}
+	public void setFileNameSubstring(String fileNameSubstring) {
+		this.fileNameSubstring = fileNameSubstring;
+	}
 	
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -265,7 +273,11 @@ public class DirMessage {
 					}
 					break;
 				}
-				case FIELDNAME_ADRESS: {
+				case FIELDNAME_FILENAMESUBSTRING:{
+					m.setFileNameSubstring(value);
+					break;
+				}
+				case FIELDNAME_ADDRESS: {
 					// Corregir el parsing de direcciones
 					String[] parts = value.split(":");
 					if (parts.length == 2) {
@@ -340,11 +352,11 @@ public class DirMessage {
 			
 			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE:
-			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);
+			sb.append(FIELDNAME_FILENAMESUBSTRING).append(DELIMITER).append(fileName).append(END_LINE);
 			break;
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK:
 			for(InetSocketAddress address : serverSocketAddresses) {
-				sb.append(FIELDNAME_ADRESS).append(DELIMITER).append(address).append(END_LINE);
+				sb.append(FIELDNAME_ADDRESS).append(DELIMITER).append(address).append(END_LINE);
 			}
 			break;
 		}
