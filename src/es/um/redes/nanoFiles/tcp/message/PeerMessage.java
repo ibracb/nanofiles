@@ -52,9 +52,6 @@ public class PeerMessage {
 	}
 	
 	public PeerMessage(byte op, String fileName) {
-	    if (op != PeerMessageOps.OPCODE_FILE_INFO_REQUEST && op != PeerMessageOps.OPCODE_UPLOAD_FILE) {
-	        throw new IllegalArgumentException("Opcode incorrecto para FILE_INFO_REQUEST/UPLOAD_FILE");
-	    }
 	    this.opcode = op;
 	    this.fileName = fileName;
 	}
@@ -126,9 +123,6 @@ public class PeerMessage {
 	
 	//el nombre del archivo solo afecta en la subida del archivo
 	public String getFileName() {
-	    if (opcode != PeerMessageOps.OPCODE_UPLOAD_FILE) {
-	        throw new IllegalStateException("Este mensaje no contiene fileName");
-	    }
 	    return fileName;
 	}
 
@@ -175,8 +169,11 @@ public class PeerMessage {
 	    byte opcode = dis.readByte();
 	    PeerMessage message = new PeerMessage(opcode);
 	    switch (opcode) {
+	    	case PeerMessageOps.OPCODE_INVALID_CODE:
+	            return message;
+
 	        case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
-	            return new PeerMessage(opcode);
+	            return message;
 
 	        case PeerMessageOps.OPCODE_FILE_INFO_REQUEST: {
 	            short nameLen = dis.readShort();
@@ -249,7 +246,7 @@ public class PeerMessage {
 	            dos.writeShort(nameBytes.length);
 	            dos.write(nameBytes);
 	            dos.writeInt(fileSize);
-	            dos.writeShort(hashBytes.length);
+	            dos.writeInt(hashBytes.length);
 	            dos.write(hashBytes);
 	            break;
 	        }
@@ -278,6 +275,8 @@ public class PeerMessage {
 	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
 	            // No additional data to write for these opcodes
 	            break;
+	        case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
+	        	break;
 
 	        default:
 	            System.err.println("PeerMessage.writeMessageToOutputStream found unexpected message opcode " + opcode + "("

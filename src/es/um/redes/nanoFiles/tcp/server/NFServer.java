@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
+import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.tcp.message.PeerMessage;
 import es.um.redes.nanoFiles.tcp.message.PeerMessageOps;
 import es.um.redes.nanoFiles.util.FileDigest;
@@ -102,7 +103,6 @@ public class NFServer implements Runnable {
                 // Esperar conexiones de clientes
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected: " + clientSocket.getInetAddress());
-                serveFilesToClient(clientSocket);
 
                 // Crear un nuevo hilo para manejar la comunicación con el cliente
                 NFServerThread serverThread = new NFServerThread(clientSocket);
@@ -158,33 +158,44 @@ public class NFServer implements Runnable {
 
 	            switch (msg.getOpcode()) {
 	                case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
-	                    String requestedName = msg.getFileName();
-	                    File file = new File(requestedName);
+	                    String requestedSubstring = msg.getFileName();
+	                    File matchedFile = null;
 
-	                    if (!file.exists()) {
+	                    // Buscar un archivo cuyo nombre contenga la subcadena
+	                    File[] files = new File(NanoFiles.sharedDirname).listFiles();
+	                    if (files != null) {
+	                        for (File file : files) {
+	                            if (file.getName().contains(requestedSubstring)) {
+	                                matchedFile = file;
+	                                break;
+	                            }
+	                        }
+	                    }
+
+	                    if (matchedFile == null) {
 	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
 	                        break;
 	                    }
 
-	                    int size = (int) file.length();
-	                    String hash = FileDigest.computeFileChecksumString(file.getAbsolutePath());
-	                    PeerMessage response = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_RESPONSE, requestedName, size, hash);
+	                    int size = (int) matchedFile.length();
+	                    String hash = FileDigest.computeFileChecksumString(matchedFile.getAbsolutePath());
+	                    PeerMessage response = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_RESPONSE, matchedFile.getName(), size, hash);
 	                    response.writeMessageToOutputStream(dos);
 	                    break;
 
 	                case PeerMessageOps.OPCODE_GET_CHUNK:
 	                    long offset = msg.getFileOffset();
 	                    int chunkSize = msg.getChunkSize();
-	                    File chunkFile = new File(msg.getFileName());
+	                    File chunkFile = new File(NanoFiles.sharedDirname, msg.getFileName()); // Corrected file path
 
 	                    if (!chunkFile.exists()) {
 	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
 	                        break;
 	                    }
 
-	                    byte[] buffer = new byte[chunkSize];
 	                    try (RandomAccessFile raf = new RandomAccessFile(chunkFile, "r")) {
 	                        raf.seek(offset);
+	                        byte[] buffer = new byte[chunkSize];
 	                        int readBytes = raf.read(buffer);
 
 	                        if (readBytes > 0) {
@@ -195,6 +206,9 @@ public class NFServer implements Runnable {
 	                            PeerMessage completeMsg = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE);
 	                            completeMsg.writeMessageToOutputStream(dos);
 	                        }
+	                    } catch (IOException e) {
+	                        System.err.println("Error reading file chunk: " + e.getMessage());
+	                        new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
 	                    }
 	                    break;
 

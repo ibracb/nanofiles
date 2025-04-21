@@ -108,6 +108,10 @@ public class NFConnector {
 						totalBytesDownloaded += chunkResponse.getChunkSize();
 					} else if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE) {
 						downloaded = true;
+						System.out.println("Download complete.");
+					} else if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_FILE_NOT_FOUND) {
+						System.err.println("File not found on server.");
+						return false;
 					} else {
 						System.err.println("Unexpected response while downloading chunk.");
 						return false;
