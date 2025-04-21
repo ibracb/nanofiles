@@ -98,7 +98,7 @@ public class NFConnector {
 	                    if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_SEND_CHUNK) {
 	                        byte[] chunkData = chunkResponse.getChunkData();
 	                        fos.write(chunkData);
-	                        offset += dis.readInt(); 
+	                        offset += chunkResponse.getChunkSize(); 
 	                        totalChunksDownloaded++;
 	                        totalBytesDownloaded += chunkResponse.getChunkSize();
 	                    } else if (chunkResponse.getOpcode() == PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE) {
@@ -113,12 +113,13 @@ public class NFConnector {
 	                    }
 	                }
 	                System.out.println("\t" + totalBytesDownloaded + " bytes (" + totalChunksDownloaded + " chunks) from server at " + serverAddr.getAddress() + ":" + serverAddr.getPort());
-	            }
+	             
+	            } 
 
 	            if (downloaded) {
-	                String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
-	                if (!downloadedFileHash.equals(expectedHash)) {
-	                    System.err.println("File integrity check failed. Hash mismatch.");
+					String downloadedFileHash = FileDigest.computeFileChecksumString(localFile.getAbsolutePath());
+	                if (downloadedFileHash == null || !downloadedFileHash.equals(expectedHash)) {
+	                    System.err.println("File integrity check failed. Hash mismatch or checksum computation error.");
 	                    return false;
 	                }
 	                System.out.println("File downloaded successfully: " + localFileName);

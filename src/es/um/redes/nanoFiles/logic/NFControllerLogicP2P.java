@@ -182,10 +182,14 @@ public class NFControllerLogicP2P {
 				        }
 
 				        NFConnector connector = new NFConnector(serverAddress);
-				        try {
-
-				            // Download the file
+				        try {				            
 				            if (connector.downloadFile(targetFileNameSubstring, localFileName)) {
+				                // Verificar que el archivo descargado existe antes de calcular el hash
+				                File downloadedFile = new File(localFileName);
+				                if (!downloadedFile.exists()) {
+				                    return false;
+				                }
+
 				                // Verify the hash of the downloaded file
 				                String downloadedFileHash = FileDigest.computeFileChecksumString(localFileName);
 				                if (expectedFileHash == null) {
