@@ -32,14 +32,6 @@ public class PeerMessage {
 		opcode = op;
 	}
 	
-	public PeerMessage(byte op, long fileOffset, int chunkSize) {
-	    if (op != PeerMessageOps.OPCODE_GET_CHUNK) {
-	        throw new IllegalArgumentException("Opcode incorrecto para GET_CHUNK");
-	    }
-	    this.opcode = op;
-	    this.fileOffset = fileOffset;
-	    this.chunkSize = chunkSize;
-	}
 	
 	public PeerMessage(byte op, long fileOffset, int chunkSize, byte[] chunkData) {
 	    if (op != PeerMessageOps.OPCODE_SEND_CHUNK) {
@@ -49,6 +41,16 @@ public class PeerMessage {
 	    this.fileOffset = fileOffset;
 	    this.chunkSize = chunkSize;
 	    this.chunkData = chunkData;
+	}
+	
+	public PeerMessage(byte op, long fileOffset, int chunkSize, String fileName) {
+	    if (op != PeerMessageOps.OPCODE_GET_CHUNK) {
+	        throw new IllegalArgumentException("Opcode incorrecto para GET_CHUNK");
+	    }
+	    this.opcode = op;
+	    this.fileOffset = fileOffset;
+	    this.chunkSize = chunkSize;
+	    this.fileName = fileName;
 	}
 	
 	public PeerMessage(byte op, String fileName) {
@@ -199,7 +201,11 @@ public class PeerMessage {
 	        case PeerMessageOps.OPCODE_GET_CHUNK: {
 	            long fileOffset = dis.readLong();
 	            int chunkSize = dis.readInt();
-	            return new PeerMessage(opcode, fileOffset, chunkSize);
+	            short nameLen = dis.readShort();
+	            byte[] nameBytes = new byte[nameLen];
+	            dis.readFully(nameBytes);
+	            String fileName = new String(nameBytes, StandardCharsets.UTF_8);
+	            return new PeerMessage(opcode, fileOffset, chunkSize, fileName);
 	        }
 
 	        case PeerMessageOps.OPCODE_SEND_CHUNK: {
@@ -221,6 +227,7 @@ public class PeerMessage {
 	        case PeerMessageOps.OPCODE_UPLOAD_ACK:
 	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
 	            return new PeerMessage(opcode);
+	        case PeerMessageOps.OPCODE_ERROR_MESSAGE:
 
 	        default:
 	            System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
@@ -254,6 +261,9 @@ public class PeerMessage {
 	        case PeerMessageOps.OPCODE_GET_CHUNK: {
 	            dos.writeLong(fileOffset);
 	            dos.writeInt(chunkSize);
+	            byte[] nameBytes = fileName.getBytes(StandardCharsets.UTF_8);
+	            dos.writeShort(nameBytes.length);
+	            dos.write(nameBytes);
 	            break;
 	        }
 
@@ -276,6 +286,8 @@ public class PeerMessage {
 	            // No additional data to write for these opcodes
 	            break;
 	        case PeerMessageOps.OPCODE_FILE_NOT_FOUND:
+	        	break;
+	        case PeerMessageOps.OPCODE_ERROR_MESSAGE:
 	        	break;
 
 	        default:

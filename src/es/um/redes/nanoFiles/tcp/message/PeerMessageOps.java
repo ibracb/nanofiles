@@ -37,8 +37,6 @@ public class PeerMessageOps {
 		    OPCODE_FILE_INFO_RESPONSE,
 		    OPCODE_DOWNLOAD_COMPLETE,
 		    OPCODE_ERROR_MESSAGE
-
-
 	};
 	private static final String[] _valid_operations_str = {  "INVALID_OPCODE", 
 		    "FILE_NOT_FOUND", 
@@ -50,8 +48,6 @@ public class PeerMessageOps {
 		    "FILE_INFO_RESPONSE",
 		    "DOWNLOAD_COMPLETE",
 		    "ERROR_MESSAGE"
-
-
 	};
 
 	private static Map<String, Byte> _operation_to_opcode;

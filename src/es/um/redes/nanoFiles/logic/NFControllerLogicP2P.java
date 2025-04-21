@@ -207,7 +207,9 @@ public class NFControllerLogicP2P {
 				    }
 				}
 
-				if (!downloaded) {
+				if (downloaded) {
+					System.out.println("* File download completed successfully: " + localFileName);
+				} else {
 					System.err.println("* Failed to download file from all servers.");
 				}
 

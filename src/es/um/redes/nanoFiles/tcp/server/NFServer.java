@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.tcp.message.PeerMessage;
@@ -102,7 +103,7 @@ public class NFServer implements Runnable {
             try {
                 // Esperar conexiones de clientes
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("New client connected: " + clientSocket.getInetAddress());
+                System.out.println("New client connected: " + clientSocket.getInetAddress()+":"+clientSocket.getPort());
 
                 // Crear un nuevo hilo para manejar la comunicación con el cliente
                 NFServerThread serverThread = new NFServerThread(clientSocket);
@@ -149,20 +150,27 @@ public class NFServer implements Runnable {
 	 *               descargar ficheros.
 	 */
 	public static void serveFilesToClient(Socket socket) throws IOException {
-	    System.out.println("Serving files to client: " + socket.getInetAddress());
+	    System.out.println("Serving files to client: " + socket.getInetAddress()+":"+socket.getPort());
 	    try (DataInputStream dis = new DataInputStream(socket.getInputStream());
 	         DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
+
+	        File sharedDir = new File(NanoFiles.sharedDirname);
+	        if (!sharedDir.exists() || !sharedDir.canRead()) {
+	            System.err.println("Error: Shared directory is not accessible. Check permissions.");
+	            new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
+	            return;
+	        }
 
 	        while (true) {
 	            PeerMessage msg = PeerMessage.readMessageFromInputStream(dis);
 
 	            switch (msg.getOpcode()) {
-	                case PeerMessageOps.OPCODE_FILE_INFO_REQUEST:
+	                case PeerMessageOps.OPCODE_FILE_INFO_REQUEST: {
 	                    String requestedSubstring = msg.getFileName();
 	                    File matchedFile = null;
 
-	                    // Buscar un archivo cuyo nombre contenga la subcadena
-	                    File[] files = new File(NanoFiles.sharedDirname).listFiles();
+	                    // Search for a file whose name contains the substring
+	                    File[] files = sharedDir.listFiles();
 	                    if (files != null) {
 	                        for (File file : files) {
 	                            if (file.getName().contains(requestedSubstring)) {
@@ -182,18 +190,21 @@ public class NFServer implements Runnable {
 	                    PeerMessage response = new PeerMessage(PeerMessageOps.OPCODE_FILE_INFO_RESPONSE, matchedFile.getName(), size, hash);
 	                    response.writeMessageToOutputStream(dos);
 	                    break;
+	                }
 
-	                case PeerMessageOps.OPCODE_GET_CHUNK:
+	                case PeerMessageOps.OPCODE_GET_CHUNK: {
 	                    long offset = msg.getFileOffset();
 	                    int chunkSize = msg.getChunkSize();
-	                    File chunkFile = new File(NanoFiles.sharedDirname, msg.getFileName());
+	                    String fileName = msg.getFileName();
 
-	                    if (!chunkFile.exists()) {
+	                    File chunkFile = new File(sharedDir, fileName);
+
+	                    if (!chunkFile.exists() || !chunkFile.canRead()) {
 	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
 	                        break;
 	                    }
 
-	                    try (RandomAccessFile raf = new RandomAccessFile(chunkFile, "r")) {
+	                    try (RandomAccessFile raf = new RandomAccessFile(chunkFile, "rw")) {
 	                        raf.seek(offset);
 	                        byte[] buffer = new byte[chunkSize];
 	                        int readBytes = raf.read(buffer);
@@ -203,17 +214,17 @@ public class NFServer implements Runnable {
 	                            PeerMessage chunkMsg = new PeerMessage(PeerMessageOps.OPCODE_SEND_CHUNK, offset, readBytes, chunkData);
 	                            chunkMsg.writeMessageToOutputStream(dos);
 	                        } else {
-	                            PeerMessage completeMsg = new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE);
-	                            completeMsg.writeMessageToOutputStream(dos);
+	                            new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE).writeMessageToOutputStream(dos);
 	                        }
 	                    } catch (IOException e) {
 	                        System.err.println("Error reading file chunk: " + e.getMessage());
 	                        new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
 	                    }
 	                    break;
+	                 }
 
 	                default:
-	                    System.err.println("Unsupported opcode: " + msg.getOpcode());
+	                    new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
 	                    break;
 	            }
 	        }
