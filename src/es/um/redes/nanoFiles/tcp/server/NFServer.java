@@ -186,7 +186,7 @@ public class NFServer implements Runnable {
 	                case PeerMessageOps.OPCODE_GET_CHUNK:
 	                    long offset = msg.getFileOffset();
 	                    int chunkSize = msg.getChunkSize();
-	                    File chunkFile = new File(NanoFiles.sharedDirname, msg.getFileName()); // Corrected file path
+	                    File chunkFile = new File(NanoFiles.sharedDirname, msg.getFileName());
 
 	                    if (!chunkFile.exists()) {
 	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_NOT_FOUND).writeMessageToOutputStream(dos);
