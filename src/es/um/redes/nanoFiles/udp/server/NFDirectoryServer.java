@@ -191,7 +191,16 @@ public class NFDirectoryServer {
 
 		}
 	}
-
+	
+	private void writeRequestFromClient(String operation, DatagramPacket datagram) {
+		System.out.println("Received " + operation + " request from " + datagram.getSocketAddress());
+	}
+	
+	private void writeResponseToClient(String operation, DatagramPacket datagram, DirMessage message) {
+		System.out.println("Sent " + operation + " response to " + datagram.getSocketAddress());
+		System.out.println(message.toString());
+	}
+	
 	private void sendResponse(DatagramPacket pkt) throws IOException {
 		/*
 		 * TODO: (Boletín MensajesASCII) Construir String partir de los datos recibidos
@@ -226,17 +235,18 @@ public class NFDirectoryServer {
 		DirMessage msgToSend=null;
 
 
-
-
-
 		switch (operation) {
 		case DirMessageOps.OPERATION_PING: {
 			
+			writeRequestFromClient(operation, pkt);
+			
 			if(dirpkt.getProtocolId().equals(NanoFiles.PROTOCOL_ID)) {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_PING_WELCOME);
+				System.out.println("* Client uses compatible protocol " + NanoFiles.PROTOCOL_ID);
 			}
 			else {
 				msgToSend = new DirMessage(DirMessageOps.OPERATION_PING_DENIED);
+				System.out.println("* Client doesn't use compatible protocol " + NanoFiles.PROTOCOL_ID);
 			}
 			
 			/*
@@ -253,30 +263,39 @@ public class NFDirectoryServer {
 			 * procesar la petición recibida (éxito o fracaso) con los datos relevantes, a
 			 * modo de depuración en el servidor
 			 */
-			System.out.println(msgToSend.toString());
+			writeResponseToClient(operation, pkt, msgToSend);
 
 			break;
 		}
 		case DirMessageOps.OPERATION_REGISTER: {
+			
+			writeRequestFromClient(operation, pkt);
+			
 		    InetSocketAddress address = (InetSocketAddress) pkt.getSocketAddress();
 		    int serverPort = dirpkt.getPort(); // Obtén el puerto del mensaje
 		    FileInfo[] files = dirpkt.getFileList();
 		    if (files == null || files.length == 0 || serverPort <= 0) {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_DENIED);
+		        System.out.println("* No files to serve");
 		    } else {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_REGISTER_OK);
 		        InetSocketAddress serverAddress = new InetSocketAddress(address.getAddress(), serverPort);
 		        registeredServers.put(serverAddress, files);
 		        publishedFiles.put(serverAddress, files);
+		        System.out.println("* Client " + pkt.getSocketAddress() + " serving " + files.length + " files on address " + serverAddress);
 		    }
-		    System.out.println(msgToSend.toString());
+		    writeResponseToClient(operation, pkt, msgToSend);
 		    break;
 		}
 		
 		
 		case DirMessageOps.OPERATION_FILELIST: {
-		    if (publishedFiles.isEmpty()) {
+		    
+			writeRequestFromClient(operation, pkt);
+			
+			if (publishedFiles.isEmpty()) {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_EMPTY);
+		        System.out.println("* No files in the directory filelist");
 		    } else {
 		        List<FileInfo> allFiles = new ArrayList<>();
 		        for (FileInfo[] fileArray : publishedFiles.values()) {
@@ -287,12 +306,16 @@ public class NFDirectoryServer {
 		        FileInfo[] fileList = allFiles.toArray(new FileInfo[0]);
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_FILELIST_OK);
 		        msgToSend.setFileList(fileList);
+		        System.out.println("* Files available in the directory filelist");
 		    }
-		    System.out.println(msgToSend.toString());
+			writeResponseToClient(operation, pkt, msgToSend);
 		    break;
 		}
 		case DirMessageOps.OPERATION_SERVERS_SHARING_FILE: {
-		    String fileSubstring = dirpkt.getFileNameSubstring();
+		    
+			writeRequestFromClient(operation, pkt);
+			
+			String fileSubstring = dirpkt.getFileNameSubstring();
 		    if (fileSubstring == null || fileSubstring.isEmpty()) {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
 		        System.err.println("Invalid filename received in servers_sharing_file operation.");
@@ -311,11 +334,12 @@ public class NFDirectoryServer {
 
 		    if (servers.isEmpty()) {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_EMPTY);
+		        System.out.println("* No servers sharing any file with that filename_substring");
 		    } else {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK, servers);
+		        System.out.println("* There are " + registeredServers.size() + "servers sharing file with the filename_substring " + fileSubstring);
 		    }
-
-		    System.out.println(msgToSend.toString());
+		    writeResponseToClient(operation, pkt, msgToSend);
 		    break;
 		}
 		
