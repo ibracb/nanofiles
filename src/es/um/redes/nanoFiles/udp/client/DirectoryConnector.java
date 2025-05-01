@@ -381,12 +381,18 @@ public class DirectoryConnector {
 	 * @return Verdadero si el directorio tiene registrado a este peer como servidor
 	 *         y ha dado de baja sus ficheros.
 	 */
-	public boolean unregisterFileServer() {
-		boolean success = false;
-		return success;
+	public boolean unregisterFileServer(int serverPort) throws IOException {
+		DirMessage message = new DirMessage(DirMessageOps.OPERATION_UNREGISTER, serverPort);
+		String messageStr = message.toString();
+		byte[] messageBytes = messageStr.getBytes();
+		byte[] response = sendAndReceiveDatagrams(messageBytes);
+
+		if (response != null && response.length > 0) {
+			String responseStr = new String(response).trim();
+			DirMessage responseMessage = DirMessage.fromString(responseStr);
+			return responseMessage.getOperation().equals(DirMessageOps.OPERATION_UNREGISTER_OK);
+		}
+		return false;
 	}
-
-
-
 
 }

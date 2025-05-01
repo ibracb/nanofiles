@@ -341,6 +341,27 @@ public class NFDirectoryServer {
 		    }
 		    writeResponseToClient(operation, pkt, msgToSend);
 		    break;
+		    
+		}
+		case DirMessageOps.OPERATION_UNREGISTER: {
+			writeRequestFromClient(operation, pkt);
+
+			InetSocketAddress clientAddress = (InetSocketAddress) pkt.getSocketAddress();
+			int serverPort = dirpkt.getPort(); // Obtener el puerto del mensaje
+			InetSocketAddress serverAddress = new InetSocketAddress(clientAddress.getAddress(), serverPort);
+
+			if (registeredServers.containsKey(serverAddress)) {
+				registeredServers.remove(serverAddress);
+				publishedFiles.remove(serverAddress);
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_UNREGISTER_OK);
+				System.out.println("* Server " + serverAddress + " unregistered successfully.");
+			} else {
+				msgToSend = new DirMessage(DirMessageOps.OPERATION_UNREGISTER_DENIED);
+				System.err.println("* Server " + serverAddress + " not found in the directory.");
+			}
+
+			writeResponseToClient(operation, pkt, msgToSend);
+			break;
 		}
 		
 		default:

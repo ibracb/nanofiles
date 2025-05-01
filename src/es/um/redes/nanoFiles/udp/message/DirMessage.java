@@ -106,6 +106,11 @@ public class DirMessage {
 	    this.serverSocketAddresses = new ArrayList<>(servers);
 	}
 	
+	public DirMessage(String operation, int serverPort) {
+		this.operation = operation;
+		this.serverPort = serverPort;
+	}
+	
 	public String getOperation() {
 		return operation;
 	}
@@ -316,6 +321,7 @@ public class DirMessage {
 	 * 
 	 * @return La cadena de caracteres con el mensaje a enviar por el socket.
 	 */
+	@Override
 	public String toString() {
 
 		StringBuffer sb = new StringBuffer();
@@ -359,6 +365,9 @@ public class DirMessage {
 				sb.append(FIELDNAME_ADDRESS).append(DELIMITER).append(address.getAddress().getHostAddress())
 					.append(":").append(address.getPort()).append(END_LINE);
 			}
+			break;
+		case DirMessageOps.OPERATION_UNREGISTER:
+			sb.append(FIELDNAME_SERVERPORT).append(DELIMITER).append(serverPort).append(END_LINE);
 			break;
 		}
 			

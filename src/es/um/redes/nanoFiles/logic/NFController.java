@@ -176,8 +176,13 @@ public class NFController {
 			 * unregisterFileServer).
 			 */
 			if (controllerPeer.serving()) {
-				controllerPeer.stopFileServer();
-				commandSucceeded = controllerDir.unregisterFileServer();
+				int serverPort = controllerPeer.getServerPort();
+				commandSucceeded = controllerDir.unregisterFileServer(serverPort); // Desregistrar del directorio
+				if (commandSucceeded) {
+					controllerPeer.stopFileServer(); // Detener el servidor
+				} else {
+					System.err.println("* Failed to unregister file server from the directory.");
+				}
 			}
 			break;
 		case NFCommands.COM_UPLOAD:

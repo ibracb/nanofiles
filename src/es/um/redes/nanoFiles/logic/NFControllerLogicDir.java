@@ -166,19 +166,17 @@ public class NFControllerLogicDir {
 	 * 
 	 * @return Éxito o fracaso de la operación
 	 */
-	protected boolean unregisterFileServer() {
-		/*
-		 * Comunicarse con el directorio (a través del directoryConnector) para enviar
-		 * la lista de ficheros servidos por este peer. Los ficheros de la carpeta local
-		 * compartida están disponibles en NanoFiles.db). Devolver éxito/fracaso de la
-		 * operación.
-		 */
+	protected boolean unregisterFileServer(int serverPort) {
 		boolean result = false;
-		if (this.directoryConnector.unregisterFileServer()) {
-			System.out.println("* File server successfully unregistered with the directory");
-			result = true;
-		} else {
-			System.err.println("* File server failed to unregister with the directory");
+		try {
+			if (directoryConnector.unregisterFileServer(serverPort)) {
+				System.out.println("* File server successfully unregistered with the directory");
+				result = true;
+			} else {
+				System.err.println("* File server failed to unregister with the directory");
+			}
+		} catch (IOException e) {
+			System.err.println("* Error while unregistering file server: " + e.getMessage());
 		}
 		return result;
 	}

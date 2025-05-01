@@ -102,6 +102,11 @@ public class NFServer implements Runnable {
 		
 		while (true) {
             try {
+            	
+            	if (serverSocket.isClosed()) {
+					System.out.println("Server socket is closed. Stopping server thread.");
+					break; // Salir del bucle si el socket está cerrado
+				}
                 // Esperar conexiones de clientes
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected: " + clientSocket.getInetAddress()+":"+clientSocket.getPort());
@@ -111,6 +116,10 @@ public class NFServer implements Runnable {
                 serverThread.start();  // Iniciar el hilo para la comunicación con el cliente
 
             } catch (IOException e) {
+            	if (serverSocket.isClosed()) {
+					System.out.println("Server stopped gracefully.");
+					break; // Salir del bucle si el socket está cerrado
+				}
                 System.err.println("Error while accepting client connection: " + e.getMessage());
                 break;  // Si ocurre un error, salir del bucle de escucha
             }

@@ -22,5 +22,8 @@ public class DirMessageOps {
 	public static final String OPERATION_SERVERS_SHARING_FILE = "servers_sharing_file";
 	public static final String OPERATION_SERVERS_SHARING_FILE_OK = "servers_sharing_file_ok";
 	public static final String OPERATION_SERVERS_SHARING_FILE_EMPTY = "servers_sharing_file_empty";
+	public static final String OPERATION_UNREGISTER = "unregister";
+	public static final String OPERATION_UNREGISTER_OK = "unregister_ok";
+	public static final String OPERATION_UNREGISTER_DENIED = "unregister_denied";
 	
 }

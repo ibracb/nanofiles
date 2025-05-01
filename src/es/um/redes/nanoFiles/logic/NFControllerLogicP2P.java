@@ -262,9 +262,8 @@ public class NFControllerLogicP2P {
 	}
 
 	protected boolean serving() {
-		boolean result = false;
-		return result;
-
+		// Verificar si el servidor de ficheros está inicializado y escuchando en un puerto válido
+		return fileServer != null && fileServer.getPort() > 0;
 	}
 
 	protected boolean uploadFileToServer(FileInfo matchingFile, String uploadToServer) {
