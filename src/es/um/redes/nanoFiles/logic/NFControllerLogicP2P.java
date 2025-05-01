@@ -5,12 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import es.um.redes.nanoFiles.tcp.client.NFConnector;
 import es.um.redes.nanoFiles.application.NanoFiles;
+import es.um.redes.nanoFiles.util.FileInfo;
 
 
 
 import es.um.redes.nanoFiles.tcp.server.NFServer;
 import es.um.redes.nanoFiles.util.FileDigest;
-import es.um.redes.nanoFiles.util.FileInfo;
 
 public class NFControllerLogicP2P {
 	/*
@@ -268,11 +268,29 @@ public class NFControllerLogicP2P {
 	}
 
 	protected boolean uploadFileToServer(FileInfo matchingFile, String uploadToServer) {
-		boolean result = false;
+	    boolean result = false;
 
+	    try {
+	        // Parse the server address
+	        String[] serverParts = uploadToServer.split(":");
+	        if (serverParts.length != 2) {
+	            System.err.println("* Invalid server address format. Use <IP>:<PORT>");
+	            return false;
+	        }
+	        InetSocketAddress serverAddress = new InetSocketAddress(serverParts[0], Integer.parseInt(serverParts[1]));
 
+	        // Use NFConnector to upload the file
+	        NFConnector connector = new NFConnector(serverAddress);
+	        try {
+	            result = connector.uploadFile(matchingFile);
+	        } finally {
+	            connector.close();
+	        }
+	    } catch (Exception e) {
+	        System.err.println("* Error during file upload: " + e.getMessage());
+	    }
 
-		return result;
+	    return result;
 	}
 
 }

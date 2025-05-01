@@ -5,14 +5,17 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.tcp.message.PeerMessage;
 import es.um.redes.nanoFiles.tcp.message.PeerMessageOps;
 import es.um.redes.nanoFiles.util.FileDigest;
+import es.um.redes.nanoFiles.util.FileInfo;
 
 //Esta clase proporciona la funcionalidad necesaria para intercambiar mensajes entre el cliente y el servidor
 public class NFConnector {
@@ -143,6 +146,50 @@ public class NFConnector {
 	    }
 
 	    return downloaded;
+	}
+
+	public boolean uploadFile(FileInfo fileInfo) throws IOException {
+	    boolean uploaded = false;
+
+	    try {
+	        PeerMessage fileInfoMessage = new PeerMessage(PeerMessageOps.OPCODE_UPLOAD_FILE, fileInfo.getFileName());
+	        fileInfoMessage.writeMessageToOutputStream(dos);
+	        PeerMessage response = PeerMessage.readMessageFromInputStream(dis);
+	        if (response.getOpcode() == PeerMessageOps.OPCODE_UPLOAD_ACK) {
+	            System.out.println("* Server accepted the file upload. Uploading...");
+
+	            // Send the file in chunks
+	            File file = new File(fileInfo.filePath);
+	            try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+	                long offset = 0;
+	                int chunkSize = 4096;
+	                byte[] buffer = new byte[chunkSize];
+	                int bytesRead;
+
+	                while ((bytesRead = raf.read(buffer)) != -1) {
+	                    PeerMessage chunkMessage = new PeerMessage(PeerMessageOps.OPCODE_SEND_CHUNK, offset, bytesRead, Arrays.copyOf(buffer, bytesRead));
+	                    chunkMessage.writeMessageToOutputStream(dos);
+	                    offset += bytesRead;
+	                }
+	            }
+
+	            // Notificar al servidor que la subida ha finalizado
+	            new PeerMessage(PeerMessageOps.OPCODE_UPLOAD_COMPLETE).writeMessageToOutputStream(dos);
+	            System.out.println("* File uploaded successfully.");
+	            uploaded = true;
+	        } else if (response.getOpcode() == PeerMessageOps.OPCODE_FILE_ALREADY_EXISTS) {
+	            System.err.println("* Server rejected the upload. File already exists.");
+	        } else {
+	            System.err.println("* Unexpected response from server.");
+	        }
+	    } catch (IOException e) {
+	        System.err.println("* Error during file upload: " + e.getMessage());
+	        throw e;
+	    }finally {
+	        close(); // Ensure resources are properly closed
+	    }
+
+	    return uploaded;
 	}
 
 	public void close() throws IOException {

@@ -223,7 +223,7 @@ public class NFController {
 		}
 		case NFCommands.COM_PING:
 		case NFCommands.COM_FILELIST:
-			commandAllowed = (currentState == OFFLINE || currentState == CONNECTED || currentState == SERVING);
+			commandAllowed = true;
 			break;
 		case NFCommands.COM_SERVE:
 			commandAllowed = (currentState == CONNECTED);
@@ -232,7 +232,7 @@ public class NFController {
 			commandAllowed =(currentState == CONNECTED || currentState == SERVING) ; 
 			break;
 		case NFCommands.COM_UPLOAD:
-			commandAllowed =(currentState == CONNECTED) ; 
+			commandAllowed =(currentState == CONNECTED || currentState == SERVING) ; 
 			break;
 		case NFCommands.COM_QUIT:
 			commandAllowed = true;
@@ -254,6 +254,8 @@ public class NFController {
 		}
 		switch (currentCommand) {
 		case NFCommands.COM_PING:
+			currentState = CONNECTED;
+			break;
 		case NFCommands.COM_FILELIST:
 			currentState = CONNECTED;
 			break;
@@ -261,15 +263,16 @@ public class NFController {
 			currentState = SERVING;
 			break;
 		case NFCommands.COM_DOWNLOAD:
-			currentState = DOWNLOADING;
+			currentState = CONNECTED;
 			break;
 		case NFCommands.COM_UPLOAD:
-			currentState = UPLOADING;
+			currentState = CONNECTED;
 			break;
 		case NFCommands.COM_QUIT:
 			currentState = OFFLINE;
 			break;
 		default:
+			
 		}
 		
 

@@ -337,7 +337,7 @@ public class NFDirectoryServer {
 		        System.out.println("* No servers sharing any file with that filename_substring");
 		    } else {
 		        msgToSend = new DirMessage(DirMessageOps.OPERATION_SERVERS_SHARING_FILE_OK, servers);
-		        System.out.println("* There are " + registeredServers.size() + "servers sharing file with the filename_substring " + fileSubstring);
+		        System.out.println("* There are " + registeredServers.size() + " servers sharing file with the filename_substring " + fileSubstring);
 		    }
 		    writeResponseToClient(operation, pkt, msgToSend);
 		    break;

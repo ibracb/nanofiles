@@ -3,6 +3,7 @@ package es.um.redes.nanoFiles.tcp.server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
@@ -224,11 +225,51 @@ public class NFServer implements Runnable {
 	                    break;
 	                 }
 
+	                case PeerMessageOps.OPCODE_UPLOAD_FILE: {
+	                    String fileName = msg.getFileName();
+	                    File uploadFile = new File(NanoFiles.sharedDirname, fileName);
+
+	                    if (uploadFile.exists()) {
+	                        new PeerMessage(PeerMessageOps.OPCODE_FILE_ALREADY_EXISTS).writeMessageToOutputStream(dos);
+	                        break;
+	                    }
+
+	                    new PeerMessage(PeerMessageOps.OPCODE_UPLOAD_ACK).writeMessageToOutputStream(dos);
+
+	                    try (FileOutputStream fos = new FileOutputStream(uploadFile)) {
+	                        boolean uploadComplete = false;
+
+	                        while (!uploadComplete) {
+	                            PeerMessage chunkMsg = PeerMessage.readMessageFromInputStream(dis);
+
+	                            if (chunkMsg.getOpcode() == PeerMessageOps.OPCODE_SEND_CHUNK) {
+	                                fos.write(chunkMsg.getChunkData());
+	                            } else if (chunkMsg.getOpcode() == PeerMessageOps.OPCODE_UPLOAD_COMPLETE) {
+	                                uploadComplete = true;
+	                                System.out.println("* File upload completed: " + fileName);
+	                            } else {
+	                                System.err.println("* Unexpected message during upload.");
+	                                break;
+	                            }
+	                        }
+	                    } catch (IOException e) {
+	                        System.err.println("Error writing uploaded file: " + e.getMessage());
+	                        new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
+	                    }
+	                    break;
+	                }
+
 	                case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE: {
 	                    System.out.println("Client has completed the download.");
 	                    clientConnected = false; // Terminate the loop
 	                    break;
 	                }
+					
+					case PeerMessageOps.OPCODE_UPLOAD_COMPLETE:{
+						System.out.println("Client has completed the upload.");
+						clientConnected = false; // Terminate the loop
+						break;
+					}
 
 	                default:
 	                    new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);

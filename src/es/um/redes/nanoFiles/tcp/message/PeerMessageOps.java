@@ -20,7 +20,8 @@ public class PeerMessageOps {
 	public static final byte OPCODE_FILE_INFO_RESPONSE = 0x07;//Servidor responde con esa info 
 	public static final byte OPCODE_DOWNLOAD_COMPLETE = 0x08;//Cliente indica que ya recibió todo.
 	public static final byte OPCODE_ERROR_MESSAGE = 0x09;//Para errores como archivo corrupto.
-	
+	public static final byte OPCODE_FILE_ALREADY_EXISTS = 0x0A; // File already exists on the server
+	public static final byte OPCODE_UPLOAD_COMPLETE = 0x0B; // Upload process completed successfully
 
 	/*
 	 * TODO: (Boletín MensajesBinarios) Definir constantes con nuevos opcodes de
@@ -36,7 +37,9 @@ public class PeerMessageOps {
 		    OPCODE_FILE_INFO_REQUEST,
 		    OPCODE_FILE_INFO_RESPONSE,
 		    OPCODE_DOWNLOAD_COMPLETE,
-		    OPCODE_ERROR_MESSAGE
+		    OPCODE_ERROR_MESSAGE,
+		    OPCODE_FILE_ALREADY_EXISTS, 
+		    OPCODE_UPLOAD_COMPLETE
 	};
 	private static final String[] _valid_operations_str = {  "INVALID_OPCODE", 
 		    "FILE_NOT_FOUND", 
@@ -47,7 +50,9 @@ public class PeerMessageOps {
 		    "FILE_INFO_REQUEST",
 		    "FILE_INFO_RESPONSE",
 		    "DOWNLOAD_COMPLETE",
-		    "ERROR_MESSAGE"
+		    "ERROR_MESSAGE",
+		    "FILE_ALREADY_EXISTS", 
+		    "UPLOAD_COMPLETE"
 	};
 
 	private static Map<String, Byte> _operation_to_opcode;

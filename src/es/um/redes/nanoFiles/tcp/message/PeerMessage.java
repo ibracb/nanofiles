@@ -225,9 +225,15 @@ public class PeerMessage {
 	        }
 
 	        case PeerMessageOps.OPCODE_UPLOAD_ACK:
+				return new PeerMessage(opcode);
 	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
 	            return new PeerMessage(opcode);
 	        case PeerMessageOps.OPCODE_ERROR_MESSAGE:
+	        	return new PeerMessage(opcode);
+	        case PeerMessageOps.OPCODE_FILE_ALREADY_EXISTS:
+	            return new PeerMessage(opcode);
+	        case PeerMessageOps.OPCODE_UPLOAD_COMPLETE:
+	            return new PeerMessage(opcode);
 
 	        default:
 	            System.err.println("PeerMessage.readMessageFromInputStream doesn't know how to parse this message opcode: "
@@ -282,6 +288,7 @@ public class PeerMessage {
 	        }
 
 	        case PeerMessageOps.OPCODE_UPLOAD_ACK:
+	        	break;
 	        case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE:
 	            // No additional data to write for these opcodes
 	            break;
@@ -289,6 +296,10 @@ public class PeerMessage {
 	        	break;
 	        case PeerMessageOps.OPCODE_ERROR_MESSAGE:
 	        	break;
+	        case PeerMessageOps.OPCODE_FILE_ALREADY_EXISTS:
+	        case PeerMessageOps.OPCODE_UPLOAD_COMPLETE:
+	            // No additional data to write for these opcodes
+	            break;
 
 	        default:
 	            System.err.println("PeerMessage.writeMessageToOutputStream found unexpected message opcode " + opcode + "("
