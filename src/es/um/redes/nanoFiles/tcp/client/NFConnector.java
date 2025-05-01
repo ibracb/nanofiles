@@ -123,6 +123,9 @@ public class NFConnector {
 	                    return false;
 	                }
 	                System.out.println("File downloaded successfully: " + localFileName);
+
+	                // Notify the server that the download is complete
+	                new PeerMessage(PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE).writeMessageToOutputStream(dos);
 	            }
 	        } else if (response.getOpcode() == PeerMessageOps.OPCODE_ERROR_MESSAGE) {
 	            System.err.println("Error del servidor: " );
@@ -135,9 +138,10 @@ public class NFConnector {
 	    } catch (IOException e) {
 	        System.err.println("Error during file download: " + e.getMessage());
 	        return false;
+	    } finally {
+	        close(); // Ensure resources are properly closed
 	    }
 
-	    socket.close();
 	    return downloaded;
 	}
 

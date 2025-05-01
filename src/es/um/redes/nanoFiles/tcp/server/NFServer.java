@@ -150,7 +150,7 @@ public class NFServer implements Runnable {
 	 *               descargar ficheros.
 	 */
 	public static void serveFilesToClient(Socket socket) throws IOException {
-	    System.out.println("Serving files to client: " + socket.getInetAddress()+":"+socket.getPort());
+	    System.out.println("Serving files to client: " + socket.getInetAddress() + ":" + socket.getPort());
 	    try (DataInputStream dis = new DataInputStream(socket.getInputStream());
 	         DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
 
@@ -161,7 +161,8 @@ public class NFServer implements Runnable {
 	            return;
 	        }
 
-	        while (true) {
+	        boolean clientConnected = true;
+	        while (clientConnected) {
 	            PeerMessage msg = PeerMessage.readMessageFromInputStream(dis);
 
 	            switch (msg.getOpcode()) {
@@ -223,8 +224,15 @@ public class NFServer implements Runnable {
 	                    break;
 	                 }
 
+	                case PeerMessageOps.OPCODE_DOWNLOAD_COMPLETE: {
+	                    System.out.println("Client has completed the download.");
+	                    clientConnected = false; // Terminate the loop
+	                    break;
+	                }
+
 	                default:
 	                    new PeerMessage(PeerMessageOps.OPCODE_ERROR_MESSAGE).writeMessageToOutputStream(dos);
+	                    clientConnected = false; // Terminate the loop on unexpected opcode
 	                    break;
 	            }
 	        }
@@ -232,7 +240,9 @@ public class NFServer implements Runnable {
 	        System.err.println("Error while serving client: " + e.getMessage());
 	    } finally {
 	        try {
-	            socket.close();
+	            if (!socket.isClosed()) {
+	                socket.close();
+	            }
 	        } catch (IOException e) {
 	            System.err.println("Error while closing client socket: " + e.getMessage());
 	        }
