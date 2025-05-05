@@ -14,8 +14,7 @@ public class NFController {
 	private static final byte OFFLINE = 0;
 	private static final byte CONNECTED = 1;
 	private static final byte SERVING = 2;
-	private static final byte DOWNLOADING = 3;
-	private static final byte UPLOADING = 4;
+	
 	/*
 	 * TODO: (Boletín Autómatas) Añadir más constantes que representen los estados
 	 * del autómata del cliente de directorio.
@@ -114,8 +113,6 @@ public class NFController {
 			 * Pedir al controllerDir enviar un "ping" al directorio, para comprobar que
 			 * está activo y disponible, y comprobar que es compatible.
 			 */
-			String [] args = shell.getCommandArguments();
-			protocolId = args[0];
 			commandSucceeded = controllerDir.ping(protocolId);
 			break;
 		case NFCommands.COM_FILELIST:

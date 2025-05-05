@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import es.um.redes.nanoFiles.application.NanoFiles;
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -70,14 +71,8 @@ public class DirMessage {
 	 */
 	public DirMessage(String operation) {
 		this.operation = operation;
+		this.protocolId = NanoFiles.PROTOCOL_ID;
 		this.fileList = new FileInfo[0];
-	}
-	
-	public DirMessage(String operation, String protocolId) {
-		this.operation = operation;
-		this.protocolId = protocolId;
-		this.fileList = new FileInfo[0];
-
 	}
 	
 	public DirMessage(String operation,int serverPort,FileInfo[] fileList) {
@@ -332,9 +327,6 @@ public class DirMessage {
 		 * valores de los atributos del objeto.
 		 */
 		switch(operation) {
-		case DirMessageOps.OPERATION_PING:
-			sb.append(FIELDNAME_PROTOCOL + DELIMITER + protocolId + END_LINE);
-			break;
 		
 		case DirMessageOps.OPERATION_DOWNLOAD:
 			sb.append(FIELDNAME_FILENAME).append(DELIMITER).append(fileName).append(END_LINE);

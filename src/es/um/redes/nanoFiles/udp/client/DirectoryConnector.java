@@ -239,7 +239,7 @@ public class DirectoryConnector {
 		 * de la operación
 		 */
 		try {
-			DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING, protocolId);
+			DirMessage message = new DirMessage(DirMessageOps.OPERATION_PING);
 			String messageStr = message.toString();
 			byte[] messageBytes = messageStr.getBytes();
 			byte[] response = sendAndReceiveDatagrams(messageBytes);

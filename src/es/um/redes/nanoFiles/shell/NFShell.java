@@ -149,9 +149,9 @@ public class NFShell {
 			}
 			break;
 		case NFCommands.COM_PING:
-			if (args.length != 1) {
+			if (args.length != 0) {
 				System.out.println(
-						"Correct use:" + NFCommands.commandToString(command) + " <protocolId>");
+						"Correct use:" + NFCommands.commandToString(command));
 				return false;
 			}
 		default:
