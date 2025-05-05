@@ -3,8 +3,10 @@ package es.um.redes.nanoFiles.udp.server;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,7 +45,7 @@ public class NFDirectoryServer {
 	 */
 	private double messageDiscardProbability;
 
-	public NFDirectoryServer(double corruptionProbability) throws SocketException {
+	public NFDirectoryServer(double corruptionProbability) throws SocketException, UnknownHostException {
 		/*
 		 * Guardar la probabilidad de pérdida de datagramas (simular enlace no
 		 * confiable)
@@ -54,14 +56,14 @@ public class NFDirectoryServer {
 		 * UDP ligado al puerto especificado por el argumento directoryPort en la
 		 * máquina local,
 		 */
-		socket = new DatagramSocket(DIRECTORY_PORT);
+		socket = new DatagramSocket(DIRECTORY_PORT,InetAddress.getByName("0.0.0.0"));
 		/*
 		 * TODO: (Boletín SocketsUDP) Inicializar atributos que mantienen el estado del
 		 * servidor de directorio: ficheros, etc.)
 		 */
 		publishedFiles = new HashMap<InetSocketAddress, FileInfo[]>();
 		registeredServers = new HashMap<InetSocketAddress, FileInfo[]>();
-	
+		
 		if (NanoFiles.testModeUDP) {
 			if (socket == null) {
 				System.err.println("[testMode] NFDirectoryServer: code not yet fully functional.\n"
