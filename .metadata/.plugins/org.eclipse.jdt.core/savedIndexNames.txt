@@ -1,4 +1,0 @@
-INDEX VERSION 1.131+C:\Users\Popito\Desktop\NanoFiles\.metadata\.plugins\org.eclipse.jdt.core
-3715198413.index
-2495207438.index
-1865797976.index
