@@ -2,9 +2,9 @@
 
 ![Java](https://img.shields.io/badge/Java-8%2B-orange?logo=openjdk&logoColor=white)
 
-NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones* (Universidad de Murcia). El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer, con transferencias de ficheros **directas entre peers** por TCP.
+NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones*. El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer, con transferencias de ficheros **directas entre peers** por TCP.
 
-> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Curso 2024/2025
+> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
 
 ## Arquitectura
 
