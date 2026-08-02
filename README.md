@@ -130,7 +130,7 @@ Esto abre un shell interactivo con los siguientes comandos:
 
 - **Protocolo NanoFiles ↔ Directorio (UDP)**: mensajes en texto plano con esquema `campo:valor` (p. ej. `operation:ping\n\n`), con un autómata de estados en cliente y servidor.
 - **Protocolo peer-to-peer (TCP)**: formato de mensajes y autómata propios para la descarga/subida directa de ficheros entre peers.
-- **Mejora implementada**: uso de **puerto efímero** en el comando `serve`, de modo que el servidor de ficheros de cada peer no depende de un puerto fijo (10000/TCP) sino que puede usar cualquier puerto disponible.
+- **Puerto efímero en el comando `serve`**: el servidor de ficheros de cada peer no depende de un puerto fijo (10000/TCP) sino que puede usar cualquier puerto disponible.
 
 ## Carpetas de datos de prueba
 
