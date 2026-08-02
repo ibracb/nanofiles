@@ -6,10 +6,11 @@
 NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones*. El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer mediante **UDP**, con transferencias de ficheros **directas entre peers** por **TCP**.
 
 > Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
+> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
 
 ## Arquitectura
 
-El sistema tiene dos roles, cada uno con su propio ejecutable:
+El sistema tiene dos roles, cada uno de ellos con su propio ejecutable:
 
 - **Directorio** ([`es.um.redes.nanoFiles.application.Directory`](src/es/um/redes/nanoFiles/application/Directory.java)): servidor central que escucha por **UDP**. Los peers se dan de alta ante él (`serve`), consultan qué ficheros están disponibles en la red (`filelist`) y reciben la lista de peers que pueden servir un fichero concreto.
 - **NanoFiles** ([`es.um.redes.nanoFiles.application.NanoFiles`](src/es/um/redes/nanoFiles/application/NanoFiles.java)): cliente que cada usuario ejecuta. Se comunica con el Directorio por UDP y, al mismo tiempo, levanta su propio **servidor TCP** para que otros peers puedan descargarle ficheros directamente (arquitectura tipo "servidor de directorio + intercambio P2P puro", similar a eDonkey/BitTorrent con tracker).
