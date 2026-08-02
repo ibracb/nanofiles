@@ -6,7 +6,6 @@
 NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones*. El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer mediante **UDP**, con transferencias de ficheros **directas entre peers** por **TCP**.
 
 > Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
-> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
 
 ## Arquitectura
 
