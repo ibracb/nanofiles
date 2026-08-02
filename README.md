@@ -1,17 +1,18 @@
 # NanoFiles
 
 ![Java](https://img.shields.io/badge/Java-8%2B-orange?logo=openjdk&logoColor=white)
+![Universidad de Murcia](https://img.shields.io/badge/Universidad%20de%20Murcia-E03B23?style=flat&logo=graduation-cap&logoColor=white)
 
-NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones* (Universidad de Murcia). El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer, con transferencias de ficheros **directas entre peers** por TCP.
+NanoFiles es una aplicación de compartición de ficheros **peer-to-peer** desarrollada en la asignatura *Redes de Comunicaciones*. El sistema combina un **servidor de Directorio** centralizado, que indexa qué ficheros ofrece cada peer mediante **UDP**, con transferencias de ficheros **directas entre peers** por **TCP**.
 
-> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Curso 2024/2025
+> Autoría: [Arturo Trinidad Hoyos](https://github.com/arthoyos) e [Ibrahim Cherif Barry](https://github.com/ibracb) · Grado en Ingeniería Informática · Universidad de Murcia · Curso 2024/2025
 
 ## Arquitectura
 
 El sistema tiene dos roles, cada uno con su propio ejecutable:
 
-- **Directorio** (`es.um.redes.nanoFiles.application.Directory`): servidor central que escucha por **UDP**. Los peers se dan de alta ante él (`serve`), consultan qué ficheros están disponibles en la red (`filelist`) y reciben la lista de peers que pueden servir un fichero concreto.
-- **NanoFiles** (`es.um.redes.nanoFiles.application.NanoFiles`): cliente que cada usuario ejecuta. Se comunica con el Directorio por UDP y, al mismo tiempo, levanta su propio **servidor TCP** para que otros peers puedan descargarle ficheros directamente (arquitectura tipo "servidor de directorio + intercambio P2P puro", similar a eDonkey/BitTorrent con tracker).
+- **Directorio** ([`es.um.redes.nanoFiles.application.Directory`](src/es/um/redes/nanoFiles/application/Directory.java)): servidor central que escucha por **UDP**. Los peers se dan de alta ante él (`serve`), consultan qué ficheros están disponibles en la red (`filelist`) y reciben la lista de peers que pueden servir un fichero concreto.
+- **NanoFiles** ([`es.um.redes.nanoFiles.application.NanoFiles`](src/es/um/redes/nanoFiles/application/NanoFiles.java)): cliente que cada usuario ejecuta. Se comunica con el Directorio por UDP y, al mismo tiempo, levanta su propio **servidor TCP** para que otros peers puedan descargarle ficheros directamente (arquitectura tipo "servidor de directorio + intercambio P2P puro", similar a eDonkey/BitTorrent con tracker).
 
 ```mermaid
 graph TB
@@ -53,16 +54,21 @@ sequenceDiagram
     A-->>B: envío del fichero (TCP)
 ```
 
-### Estructura del código fuente
+### Estructura del proyecto
 
 ```
-src/es/um/redes/nanoFiles/
-├── application/      Puntos de entrada: NanoFiles.java (cliente) y Directory.java (servidor)
-├── logic/             Controladores: lógica de comunicación con el Directorio y entre peers
-├── shell/              Intérprete de comandos interactivo (NFShell, NFCommands)
-├── udp/                Protocolo NanoFiles ↔ Directorio (cliente, servidor y formato de mensajes)
-├── tcp/                Protocolo peer-to-peer (cliente, servidor y formato de mensajes)
-└── util/               Utilidades: base de datos de ficheros compartidos, cálculo de hashes, metadatos
+nanofiles/
+├── nf-shared/         Carpeta compartida del primer peer (datos de prueba)
+├── nf-shared2/        Carpeta compartida del segundo peer (datos de prueba)
+├── src/es/um/redes/nanoFiles/
+│   ├── application/   Puntos de entrada: NanoFiles.java (cliente) y Directory.java (servidor)
+│   ├── logic/         Controladores: lógica de comunicación con el Directorio y entre peers
+│   ├── shell/         Intérprete de comandos interactivo (NFShell, NFCommands)
+│   ├── tcp/           Protocolo peer-to-peer (cliente, servidor y formato de mensajes)
+│   ├── udp/           Protocolo NanoFiles ↔ Directorio (cliente, servidor y formato de mensajes)
+│   └── util/          Utilidades: base de datos de ficheros compartidos, cálculo de hashes, metadatos
+├── .gitignore         Reglas de exclusión de archivos
+└── README.md          Documentación principal del proyecto
 ```
 
 ## Requisitos
@@ -108,8 +114,8 @@ Esto abre un shell interactivo con los siguientes comandos:
 | `filelist` | Muestra la lista de ficheros indexados en el Directorio |
 | `myfiles` | Muestra los ficheros de tu carpeta local compartida |
 | `serve` | Levanta tu servidor de ficheros TCP y publica tus ficheros en el Directorio |
-| `download` | Descarga un fichero de los peers que lo tengan disponible |
-| `upload` | Sube un fichero a un peer servidor |
+| `download <filename_substring> <local_filename>` | Descarga el fichero que coincida con el primer parámetro y lo guarda con el nombre del segundo parámetro |
+| `upload <filename_substring> <remote_server>` | Sube el fichero que coincida con el primer parámetro al servidor indicado en el segundo parámetro |
 | `help` | Muestra la ayuda de comandos |
 | `quit` | Sale de la aplicación |
 
@@ -127,4 +133,4 @@ Esto abre un shell interactivo con los siguientes comandos:
 
 ## Carpetas de datos de prueba
 
-`nf-shared/` y `nf-shared2/` contienen ficheros de ejemplo usados para probar la compartición y descarga entre dos peers distintos durante el desarrollo; no forman parte del código de la aplicación.
+[`nf-shared/`](nf-shared) y [`nf-shared2/`](nf-shared2) contienen ficheros de ejemplo usados para probar la compartición y descarga entre dos peers distintos durante el desarrollo; no forman parte del código de la aplicación.
